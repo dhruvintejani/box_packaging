@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
@@ -20,7 +21,13 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 
 export default function Products() {
 
+  const [searchParams] = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('focus') === 'search') searchInputRef.current?.focus();
+  }, [searchParams]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -108,7 +115,7 @@ export default function Products() {
       <div className="space-y-2 pt-2">
         <button
           onClick={() => setMobileFiltersOpen(false)}
-          className="w-full bg-[#c4883a] hover:bg-[#b07a30] text-white text-sm font-semibold py-2.5 rounded transition-all cursor-pointer"
+          className="lg:hidden w-full bg-[#c4883a] hover:bg-[#b07a30] text-white text-sm font-semibold py-2.5 rounded transition-all cursor-pointer"
         >
           Apply Filters
         </button>
@@ -146,6 +153,7 @@ export default function Products() {
             <div className="flex-1 relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a9490]" />
               <input
+                ref={searchInputRef}
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
