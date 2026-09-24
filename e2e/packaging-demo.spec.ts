@@ -334,9 +334,11 @@ test('desktop navigation has premium hover/focus feedback and active state witho
   await expect.poll(async () => products.evaluate((node) =>
     getComputedStyle(node).backgroundColor
   )).not.toBe('rgba(0, 0, 0, 0)');
+  // Tailwind 4 uses the CSS scale property rather than a transform matrix.
+  // The rendered underline width validates the actual on-screen interaction.
   await expect.poll(async () => products.locator('span[aria-hidden="true"]').evaluate(
-    (node) => getComputedStyle(node).transform
-  )).toBe('matrix(1, 0, 0, 1, 0, 0)');
+    (node) => node.getBoundingClientRect().width
+  )).toBeGreaterThan(16);
   const after = await products.boundingBox();
   expect(after?.width).toBe(initial?.width);
   expect(after?.height).toBe(initial?.height);
