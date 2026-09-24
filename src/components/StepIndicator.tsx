@@ -12,7 +12,8 @@ interface StepIndicatorProps {
 
 export default function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
-    <div className="flex items-center justify-between w-full">
+    <div className="flex w-full flex-col gap-3" aria-label="Enquiry progress">
+      <div className="flex items-center justify-between w-full">
       {steps.map((step, index) => {
         const isCompleted = step.number < currentStep;
         const isActive = step.number === currentStep;
@@ -50,6 +51,10 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
           </div>
         );
       })}
+      </div>
+      <p className="text-center text-xs font-bold text-[#84571e] sm:hidden" aria-live="polite">
+        Step {currentStep} of {steps.length}: {steps.find((step) => step.number === currentStep)?.label}
+      </p>
     </div>
   );
 }
