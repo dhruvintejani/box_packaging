@@ -35,7 +35,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}
-      className="bg-white border border-[#e5e0d8] rounded-lg overflow-hidden flex flex-col group hover:shadow-md transition-shadow duration-200"
+      className="bg-white border border-[#e5e0d8] rounded-xl overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-200"
     >
       {/* Image */}
       <div className="aspect-[4/3] bg-[#f8f6f2] overflow-hidden relative">
@@ -75,10 +75,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </p>
 
         {/* Actions */}
-        <div className="flex items-center justify-between gap-2 mt-auto">
+        <div className="mt-auto flex flex-col gap-2 xs:flex-row xs:items-center xs:justify-between">
           <button
-            onClick={() => navigate(`/products`)}
-            className="text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer flex items-center gap-1"
+            onClick={() => navigate(`/products/${product.slug}`)}
+            className="inline-flex min-h-11 flex-1 items-center justify-start gap-1 rounded-lg text-sm font-bold text-[#9b6624] transition-colors hover:text-[#754719] focus-visible:outline-2 focus-visible:outline-[#c4883a]"
           >
             View Details
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -88,7 +88,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           <button
             onClick={handleAdd}
-            className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded border transition-all duration-150 cursor-pointer ${
+            className={`flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-sm font-semibold transition-all duration-150 cursor-pointer sm:w-auto ${
               selected
                 ? 'bg-[#f5e8d0] border-[#c4883a] text-[#c4883a]'
                 : feedback === 'idle'
