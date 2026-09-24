@@ -1,3 +1,4 @@
+import { imageUrl } from '../utils/images';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -57,7 +58,7 @@ export default function Home() {
           <div
             className="absolute inset-0 bg-cover bg-center opacity-35"
             style={{
-              backgroundImage: 'url(/images/hero-boxes.jpg)',
+              backgroundImage: `url(${imageUrl('/images/hero-boxes.jpg')})`,
             }}
             aria-hidden="true"
           />
@@ -67,7 +68,7 @@ export default function Home() {
           <div
             className="absolute right-0 top-0 bottom-0 w-[45%] hidden lg:block opacity-60"
             style={{
-              backgroundImage: 'url(/images/product-shipping-carton.jpg)',
+              backgroundImage: `url(${imageUrl('/images/product-shipping-carton.jpg')})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               clipPath: 'polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%)',
