@@ -125,31 +125,21 @@ export default function Home() {
               >
                 <button
                   onClick={() => navigate('/products')}
-                  className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer shadow-md hover:shadow-lg"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 bg-[#c4883a] sm:w-auto hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer shadow-md hover:shadow-lg"
                 >
                   Explore Products
                   <ChevronRight size={18} />
                 </button>
                 <button
                   onClick={() => navigate('/quote')}
-                  className="flex items-center gap-2 bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 bg-transparent sm:w-auto border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer"
                 >
-                  Request a Quote
+                  Build Sample Enquiry
                 </button>
               </motion.div>
             </div>
 
-            {/* Slide counter */}
-            <div className="absolute bottom-6 right-6 hidden lg:flex items-center gap-3">
-              {['01', '02', '03'].map((n) => (
-                <span
-                  key={n}
-                  className={`text-xs font-semibold ${n === '01' ? 'text-white' : 'text-[#5a5550]'}`}
-                >
-                  {n}
-                </span>
-              ))}
-            </div>
+
           </div>
         </section>
 
