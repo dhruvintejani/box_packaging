@@ -20,12 +20,11 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   }, [key, storedValue]);
 
   const setValue = (value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-    } catch {
-      // Ignore errors
-    }
+    // Use React's functional updater. Two quick actions must not overwrite each
+    // other with an older value captured by the render closure.
+    setStoredValue((previous) =>
+      typeof value === 'function' ? (value as (val: T) => T)(previous) : value
+    );
   };
 
   return [storedValue, setValue] as const;
