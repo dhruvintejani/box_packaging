@@ -81,6 +81,7 @@ export default function Quote() {
   });
   const [showClearModal, setShowClearModal] = useState(false);
   const [step1Error, setStep1Error] = useState('');
+  const [dimensionErrors, setDimensionErrors] = useState<Record<string, string>>({});
 
   const {
     register,
@@ -121,11 +122,40 @@ export default function Quote() {
     goToStep(2);
   };
 
+  const validateDimensions = () => {
+    const nextErrors: Record<string, string> = {};
+    for (const productId of enquiry.selectedProductIds) {
+      const specs = enquiry.specifications[productId];
+      if (!specs) continue;
+      const dimensions = [specs.length ?? '', specs.width ?? '', specs.height ?? ''].map((value) => value.trim());
+      if (dimensions.every((value) => value === '')) continue;
+      if (dimensions.some((value) => value === '')) {
+        nextErrors[productId] = 'Enter all three dimensions, or leave them all blank and describe your requirements below.';
+      } else if (dimensions.some((value) => !/^\\d{1,5}(\\.\\d{1,2})?$/.test(value) || Number(value) <= 0 || Number(value) > 10000)) {
+        nextErrors[productId] = 'Enter valid dimensions greater than 0 and no more than 10,000 mm (up to 2 decimal places).';
+      }
+    }
+    setDimensionErrors(nextErrors);
+    return nextErrors;
+  };
+
   const handleStep2Next = () => {
+    if (selectedCount === 0) {
+      goToStep(1);
+      return;
+    }
+    const nextErrors = validateDimensions();
+    const firstInvalid = Object.keys(nextErrors)[0];
+    if (firstInvalid) {
+      document.getElementById('dimensions-' + firstInvalid)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
     goToStep(3);
   };
 
   const handleStep3Next = async () => {
+    if (selectedCount === 0) { goToStep(1); return; }
+    if (Object.keys(validateDimensions()).length > 0) { goToStep(2); return; }
     const valid = await trigger();
     if (!valid) return;
     const values = getValues();
@@ -368,32 +398,54 @@ export default function Quote() {
                                     label={`Quantity for ${product.name}`} />
                                 </div>
 
-                                                                {/* Dimensions */}
-                                <div className="mb-5">
-                                  <label className="block text-sm font-semibold text-[#1a1a1a] mb-1">
+                                                                {/* Optional but complete, positive dimensions */}
+                                <div className="mb-5" id={`dimensions-${productId}`}>
+                                  <p className="mb-1 text-sm font-semibold text-[#1a1a1a]">
                                     Dimensions (mm) — optional
-                                  </label>
-                                  <p className="text-[#9a9490] text-xs mb-3">
-                                    Don't know the dimensions? Describe what you need to pack in the notes below.
                                   </p>
-                                  <div className="grid grid-cols-3 gap-3">
+                                  <p className="mb-3 text-xs leading-5 text-[#766d63]">
+                                    Provide length, width and height together (maximum 10,000 mm each).
+                                    Not sure? Leave all three blank and describe what you're packing in the notes.
+                                  </p>
+                                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
                                     {(['length', 'width', 'height'] as const).map((dim) => (
-                                      <div key={dim}>
-                                        <label className="block text-xs text-[#9a9490] mb-1 uppercase tracking-wide">
-                                          {dim === 'length' ? 'L' : dim === 'width' ? 'W' : 'H'}
+                                      <div key={dim} className="min-w-0">
+                                        <label htmlFor={`${dim}-${productId}`}
+                                          className="mb-1 block text-[11px] font-bold uppercase tracking-wide text-[#736a60] sm:text-xs">
+                                          {dim === 'length' ? 'Length' : dim === 'width' ? 'Width' : 'Height'}
                                         </label>
                                         <input
-                                          type="number"
-                                          min="0"
-                                          placeholder={dim === 'length' ? 'Length' : dim === 'width' ? 'Width' : 'Height'}
+                                          id={`${dim}-${productId}`}
+                                          type="text"
+                                          inputMode="decimal"
+                                          autoComplete="off"
+                                          placeholder="mm"
                                           value={specs[dim] ?? ''}
-                                          onChange={(e) => updateSpecifications(productId, { [dim]: e.target.value })}
-                                          className="w-full border border-[#e5e0d8] rounded py-2 px-3 text-sm focus:outline-none focus:border-[#c4883a] focus:ring-1 focus:ring-[#c4883a]/30"
-                                          aria-label={`${dim} in millimeters`}
+                                          onChange={(event) => {
+                                            updateSpecifications(productId, { [dim]: event.target.value });
+                                            setDimensionErrors((previous) => {
+                                              if (!previous[productId]) return previous;
+                                              const next = { ...previous };
+                                              delete next[productId];
+                                              return next;
+                                            });
+                                          }}
+                                          aria-label={`${product.name} ${dim} in millimeters`}
+                                          aria-invalid={!!dimensionErrors[productId]}
+                                          aria-describedby={dimensionErrors[productId] ? `dimension-error-${productId}` : undefined}
+                                          className={`min-h-11 w-full min-w-0 rounded-lg border bg-white px-2.5 py-2.5 text-sm outline-none transition-shadow focus:ring-2 focus:ring-[#c4883a]/20 sm:px-3 ${
+                                            dimensionErrors[productId] ? 'border-red-500 focus:border-red-500' : 'border-[#d8d0c5] focus:border-[#c4883a]'
+                                          }`}
                                         />
                                       </div>
                                     ))}
                                   </div>
+                                  {dimensionErrors[productId] && (
+                                    <p role="alert" id={`dimension-error-${productId}`}
+                                      className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium leading-5 text-red-700">
+                                      {dimensionErrors[productId]}
+                                    </p>
+                                  )}
                                 </div>
 
                                 {/* Ply preference */}
@@ -523,7 +575,7 @@ export default function Quote() {
                           3. Your Details
                         </h2>
                         <p className="text-[#5a5550] text-sm">
-                          Use sample contact information to see how your request would look. Nothing is submitted.
+                          Use sample contact information to see how your request would look. Nothing is submitted, and contact details are cleared when you reload the page.
                         </p>
                       </div>
                       <button
