@@ -1,4 +1,5 @@
 import type { Product } from '../types/product';
+import { imageUrl } from '../utils/images';
 
 // Fifteen curated sample products. All imagery is served from our local box-photo library.
 // Images for specialty variants are representative, not exact manufacturing specifications.
@@ -175,7 +176,7 @@ export const products: Product[] = [
     tags: ['self locking', 'mailer', 'no tape', 'fast packing', 'assembly'],
   },
 
-];
+].map((product) => ({ ...product, image: imageUrl(product.image) }));
 
 export const productCategories: string[] = [
   'All',
