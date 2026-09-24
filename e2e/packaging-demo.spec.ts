@@ -329,7 +329,11 @@ test('desktop navigation has premium hover/focus feedback and active state witho
       underline: underline ? getComputedStyle(underline).transform : '',
     };
   });
-  expect(hovered.background).not.toBe('rgba(0, 0, 0, 0)');
+  // Hover background is animated: poll until the transition starts rather
+  // than sampling during the very first transparent animation frame.
+  await expect.poll(async () => products.evaluate((node) =>
+    getComputedStyle(node).backgroundColor
+  )).not.toBe('rgba(0, 0, 0, 0)');
   await expect.poll(async () => products.locator('span[aria-hidden="true"]').evaluate(
     (node) => getComputedStyle(node).transform
   )).toBe('matrix(1, 0, 0, 1, 0, 0)');
@@ -376,4 +380,24 @@ test('skip navigation reaches main content and mobile layout respects header hei
     const fits = await page.locator('body').evaluate((body) => body.scrollWidth <= innerWidth + 2);
     expect(fits, 'Horizontal overflow at ' + path).toBeTruthy();
   }
+});
+
+test('320px header fits with an active enquiry basket and usable menu', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto('/products/standard-shipping-carton');
+  await page.getByRole('button', { name: 'Continue to Enquiry' }).click();
+  await expect(page.getByRole('button', { name: 'Enquiry basket, 1 items' })).toBeVisible();
+  await expect(page.locator('header').getByText('PACKFORM')).toBeVisible();
+  const sizes = await page.locator('header').evaluate((node) => ({
+    header: node.getBoundingClientRect().width,
+    right: node.getBoundingClientRect().right,
+    viewport: innerWidth,
+  }));
+  expect(sizes.header).toBeLessThanOrEqual(sizes.viewport + 2);
+  expect(sizes.right).toBeLessThanOrEqual(sizes.viewport + 2);
+  await expect(page.locator('body').evaluate((body) =>
+    body.scrollWidth <= innerWidth + 2
+  )).resolves.toBeTruthy();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
 });
