@@ -5,7 +5,6 @@ import ProductPhoto from '../components/ProductPhoto';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DemoBanner from '../components/DemoBanner';
-import PageHero from '../components/PageHero';
 import QuantityControl from '../components/QuantityControl';
 import { products } from '../data/products';
 import { useEnquiry } from '../context/EnquiryContext';
@@ -54,19 +53,24 @@ export default function ProductDetails() {
       <Header />
       <main className="flex-1 pt-[70px]">
         <DemoBanner />
-        <PageHero breadcrumbs={[{ label: 'Home' }, { label: 'Products' }, { label: product.name }]}
-          title="Product" titleAccent="Details"
-          subtitle="Explore this packaging option and add it to your sample quotation."
-          image="/images/corrugated-stack.jpg" />
-        <div className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 lg:px-8">
-          <Link to="/products" className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#9d6829] hover:text-[#754719] focus-visible:outline-2">
+        <div className="border-b border-[#ebdfcf] bg-gradient-to-r from-[#fdfaf5] via-[#fffdf9] to-[#f3e9db]">
+          <nav aria-label="Breadcrumb" className="mx-auto flex min-h-14 max-w-[1280px] flex-wrap items-center gap-2 px-4 py-3 text-xs font-semibold text-[#776b5f] sm:px-6 lg:px-8">
+            <Link to="/" className="rounded-md py-1 hover:text-[#9b6624] focus-visible:outline-2">Home</Link>
+            <span aria-hidden="true" className="text-[#b5a48e]">/</span>
+            <Link to="/products" className="rounded-md py-1 hover:text-[#9b6624] focus-visible:outline-2">Products</Link>
+            <span aria-hidden="true" className="text-[#b5a48e]">/</span>
+            <span aria-current="page" className="min-w-0 text-[#78501f]">{product.name}</span>
+          </nav>
+        </div>
+        <div className="mx-auto max-w-[1280px] px-4 pb-12 pt-5 sm:px-6 sm:pt-8 lg:px-8">
+          <Link to="/products" className="mb-5 inline-flex min-h-10 items-center gap-2 rounded-lg px-1 text-sm font-bold text-[#9d6829] hover:text-[#754719] focus-visible:outline-2 sm:mb-7">
             <ArrowLeft size={17} /> All products
           </Link>
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <ProductPhoto key={product.id} src={product.image} alt={product.name} />
             <div className="min-w-0">
               <span className="mb-3 inline-block rounded-full bg-[#f5e8d0] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#986425]">{product.category}</span>
-              <h2 className="mb-4 text-3xl font-extrabold leading-tight text-[#1a1a1a] sm:text-4xl">{product.name}</h2>
+              <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight text-[#1a1a1a] sm:text-4xl">{product.name}</h1>
               <p className="mb-6 max-w-xl text-base leading-7 text-[#5a5550]">{product.description}</p>
               <div className="mb-7 rounded-xl border border-[#eadbc3] bg-[#fffaf3] p-4">
                 <h2 className="mb-2 text-sm font-bold text-[#1a1a1a]">Customised to your requirements</h2>
