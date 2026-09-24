@@ -1,4 +1,5 @@
-import { createContext, useContext, useCallback } from 'react';
+import { createContext, useContext, useCallback, useEffect } from 'react';
+import { products } from '../data/products';
 import type { ReactNode } from 'react';
 import type { EnquiryState, ProductSpecifications, CustomerDetails, PlyPreference, PrintingPreference } from '../types/enquiry';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -36,6 +37,25 @@ const EnquiryContext = createContext<EnquiryContextValue | null>(null);
 
 export function EnquiryProvider({ children }: { children: ReactNode }) {
   const [enquiry, setEnquiry] = useLocalStorage<EnquiryState>('packform-enquiry', defaultEnquiry);
+
+  // A visitor may still have saved items from the former 22-item sample
+  // catalogue. Drop removed product IDs so the 15-product demo never shows
+  // ghost selections or misleading basket counts.
+  useEffect(() => {
+    const supported = new Set(products.map((product) => product.id));
+    setEnquiry((previous) => {
+      const ids = [...new Set(previous.selectedProductIds.filter((id) => supported.has(id)))];
+      if (ids.length === previous.selectedProductIds.length) return previous;
+      const specifications = Object.fromEntries(
+        ids.filter((id) => previous.specifications[id])
+          .map((id) => [id, previous.specifications[id]])
+      );
+      return { ...previous, selectedProductIds: ids, specifications };
+    });
+    // This is a one-time migration for previously saved demo values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const addProduct = useCallback(
     (productId: string): boolean => {
