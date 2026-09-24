@@ -1,9 +1,11 @@
+import { imageUrl } from '../utils/images';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Leaf, Shield, Settings, Truck, ChevronRight } from 'lucide-react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import DemoBanner from '../components/DemoBanner';
 import { products } from '../data/products';
 
 
@@ -46,6 +48,7 @@ export default function Home() {
       <Header />
 
       <main className="flex-1 pt-[70px]">
+        <DemoBanner />
         {/* HERO */}
         <section
           className="relative min-h-[480px] sm:min-h-[540px] lg:min-h-[580px] bg-[#1a1a1a] overflow-hidden flex items-center"
@@ -55,7 +58,7 @@ export default function Home() {
           <div
             className="absolute inset-0 bg-cover bg-center opacity-35"
             style={{
-              backgroundImage: 'url(/images/hero-boxes.jpg)',
+              backgroundImage: `url(${imageUrl('/images/hero-boxes.jpg')})`,
             }}
             aria-hidden="true"
           />
@@ -65,7 +68,7 @@ export default function Home() {
           <div
             className="absolute right-0 top-0 bottom-0 w-[45%] hidden lg:block opacity-60"
             style={{
-              backgroundImage: 'url(/images/product-shipping-carton.jpg)',
+              backgroundImage: `url(${imageUrl('/images/product-shipping-carton.jpg')})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               clipPath: 'polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%)',
@@ -123,31 +126,21 @@ export default function Home() {
               >
                 <button
                   onClick={() => navigate('/products')}
-                  className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer shadow-md hover:shadow-lg"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 bg-[#c4883a] sm:w-auto hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer shadow-md hover:shadow-lg"
                 >
                   Explore Products
                   <ChevronRight size={18} />
                 </button>
                 <button
                   onClick={() => navigate('/quote')}
-                  className="flex items-center gap-2 bg-transparent border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer"
+                  className="flex min-h-12 w-full items-center justify-center gap-2 bg-transparent sm:w-auto border-2 border-white text-white hover:bg-white hover:text-[#1a1a1a] font-semibold px-6 py-3 rounded transition-all duration-150 cursor-pointer"
                 >
-                  Request a Quote
+                  Build Sample Enquiry
                 </button>
               </motion.div>
             </div>
 
-            {/* Slide counter */}
-            <div className="absolute bottom-6 right-6 hidden lg:flex items-center gap-3">
-              {['01', '02', '03'].map((n) => (
-                <span
-                  key={n}
-                  className={`text-xs font-semibold ${n === '01' ? 'text-white' : 'text-[#5a5550]'}`}
-                >
-                  {n}
-                </span>
-              ))}
-            </div>
+
           </div>
         </section>
 
@@ -190,10 +183,10 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.06 }}
                   className="bg-white flex flex-col group cursor-pointer"
-                  onClick={() => navigate('/products')}
+                  onClick={() => navigate(`/products/${product.slug}`)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/products')}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(`/products/${product.slug}`)}
                   aria-label={`View ${product.name}`}
                 >
                   <div className="aspect-square bg-[#f8f6f2] overflow-hidden">

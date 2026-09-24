@@ -7,6 +7,9 @@ import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 import StepIndicator from '../components/StepIndicator';
 import Modal from '../components/Modal';
+import DemoBanner from '../components/DemoBanner';
+import QuantityControl from '../components/QuantityControl';
+import { safeQuantity } from '../utils/quantity';
 import { getProductById } from '../data/products';
 import { useEnquiry } from '../context/EnquiryContext';
 import { formatEnquiryText } from '../utils/enquiryFormatter';
@@ -16,7 +19,7 @@ const STEPS = [
   { number: 1, label: 'Select Products' },
   { number: 2, label: 'Specify Requirements' },
   { number: 3, label: 'Your Details' },
-  { number: 4, label: 'Review & Submit' },
+  { number: 4, label: 'Preview Enquiry' },
 ];
 
 const PLY_LABELS: Record<string, string> = {
@@ -34,7 +37,7 @@ const PRINTING_LABELS: Record<string, string> = {
 
 export default function EnquiryPreview() {
   const navigate = useNavigate();
-  const { enquiry, removeProduct, clearEnquiry } = useEnquiry();
+  const { enquiry, removeProduct, clearEnquiry, updateSpecifications } = useEnquiry();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [showClearModal, setShowClearModal] = useState(false);
 
@@ -43,6 +46,7 @@ export default function EnquiryPreview() {
   const handleCopy = async () => {
     const text = formatEnquiryText(enquiry);
     try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
       await navigator.clipboard.writeText(text);
       setCopyState('copied');
       setTimeout(() => setCopyState('idle'), 2500);
@@ -87,6 +91,7 @@ export default function EnquiryPreview() {
       <Header />
 
       <main className="flex-1 pt-[70px]">
+        <DemoBanner />
         {/* Hero */}
         <PageHero
           breadcrumbs={[
@@ -96,7 +101,7 @@ export default function EnquiryPreview() {
           ]}
           title="Review Your"
           titleAccent="Enquiry"
-          subtitle="Please review your selected products and details before submitting. We'll get back to you with a tailored quotation soon."
+          subtitle="Preview your sample request. Edit the details, copy the summary or download it — no actual enquiry will be sent."
           image="/images/hero-boxes.jpg"
           taglineLines={['YOUR', 'IDEAS', 'OUR', 'PACKAGING']}
         />
@@ -127,7 +132,7 @@ export default function EnquiryPreview() {
             {/* Main: Selected products */}
             <div className="flex-1 min-w-0">
               {/* Selected products header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-[#1a1a1a] font-extrabold text-xl sm:text-2xl">
                     Selected Products ({selectedProductIds.length})
@@ -158,7 +163,7 @@ export default function EnquiryPreview() {
               ) : (
                 <div className="border border-[#e5e0d8] rounded-xl overflow-hidden">
                   {/* Table header */}
-                  <div className="hidden sm:grid sm:grid-cols-[1fr_1fr_auto_auto] bg-[#f8f6f2] border-b border-[#e5e0d8] px-4 py-3">
+                  <div className="hidden border-b border-[#e5e0d8] bg-[#f8f6f2] px-4 py-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:gap-x-2">
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Product</span>
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Specifications</span>
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Quantity</span>
@@ -176,7 +181,7 @@ export default function EnquiryPreview() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className="flex flex-col sm:grid sm:grid-cols-[1fr_1fr_auto_auto] gap-4 sm:gap-0 p-4 border-b border-[#e5e0d8] last:border-0 items-start sm:items-center"
+                        className="flex flex-col gap-4 border-b border-[#e5e0d8] p-4 last:border-0 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-x-2"
                       >
                         {/* Product info */}
                         <div className="flex items-center gap-3">
@@ -187,9 +192,9 @@ export default function EnquiryPreview() {
                               className="w-full h-full object-cover"
                               loading="lazy"
                               onError={(e) => {
-                                const t = e.target as HTMLImageElement;
-                                t.style.display = 'none';
-                                t.parentElement!.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📦</div>';
+                                const image = e.currentTarget;
+                                image.onerror = null;
+                                image.src = '/images/product-custom-box.jpg';
                               }}
                             />
                           </div>
@@ -242,7 +247,9 @@ export default function EnquiryPreview() {
                         {/* Quantity */}
                         <div className="sm:px-4">
                           <span className="text-[#1a1a1a] font-bold text-sm">
-                            {specs.quantity.toLocaleString()} <span className="text-[#9a9490] font-normal">pcs</span>
+                            <QuantityControl quantity={safeQuantity(specs.quantity)} compact
+                              onChange={(quantity) => updateSpecifications(productId, { quantity })}
+                              label={`Quantity for ${product.name} in preview`} />
                           </span>
                         </div>
 
@@ -262,7 +269,7 @@ export default function EnquiryPreview() {
                 </div>
               )}
 
-              {/* Additional notes area */}
+              {/* Guidance on editing notes */}
               <div className="mt-4 border border-dashed border-[#e5e0d8] rounded-xl p-4 flex items-start gap-3 bg-[#f8f6f2]">
                 <div className="w-8 h-8 rounded border border-[#e5e0d8] bg-white flex items-center justify-center shrink-0">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -273,16 +280,20 @@ export default function EnquiryPreview() {
                 <div>
                   <p className="text-[#1a1a1a] font-semibold text-sm">Additional Notes (Optional)</p>
                   <p className="text-[#9a9490] text-xs mt-1">
-                    E.g. special requirements, delivery location, expected timeline, or any other details...
+                    Add or update these in the requirements step before copying or downloading your enquiry.
                   </p>
                 </div>
+                <button type="button" onClick={() => navigate('/quote', { state: { returnStep: 2 } })}
+                  className="ml-auto min-h-11 shrink-0 rounded-lg border border-[#c4883a] px-3 py-2 text-xs font-bold text-[#9b6624] hover:bg-[#fff3df]">
+                  Edit notes
+                </button>
               </div>
 
               {/* Action buttons */}
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap print:hidden">
                 <button
                   onClick={handleCopy}
-                  className={`flex items-center gap-2 px-4 py-2.5 border rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-all sm:w-auto ${
                     copyState === 'copied'
                       ? 'border-green-400 bg-green-50 text-green-700'
                       : copyState === 'error'
@@ -310,7 +321,7 @@ export default function EnquiryPreview() {
 
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-2 px-4 py-2.5 border border-[#e5e0d8] bg-white text-[#1a1a1a] hover:border-[#c4883a] hover:text-[#c4883a] rounded-lg text-sm font-semibold transition-all cursor-pointer"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#e5e0d8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1a1a1a] transition-all hover:border-[#c4883a] hover:text-[#c4883a] sm:w-auto"
                 >
                   <Download size={15} />
                   Download .txt
@@ -318,7 +329,7 @@ export default function EnquiryPreview() {
 
                 <button
                   onClick={() => setShowClearModal(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 border border-[#e5e0d8] bg-white text-[#5a5550] hover:border-red-300 hover:text-red-600 rounded-lg text-sm font-medium transition-all cursor-pointer ml-auto"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#e5e0d8] bg-white px-4 py-2.5 text-sm font-medium text-[#5a5550] transition-all hover:border-red-300 hover:text-red-600 sm:ml-auto sm:w-auto"
                 >
                   <Trash2 size={15} />
                   Clear Enquiry
@@ -361,77 +372,24 @@ export default function EnquiryPreview() {
                 </div>
               </div>
 
-              {/* What Happens Next */}
-              <div className="bg-white border border-[#e5e0d8] rounded-xl p-5">
-                <h3 className="text-[#1a1a1a] font-bold text-base mb-4">What Happens Next?</h3>
-                <div className="space-y-4">
-                  {[
-                    {
-                      icon: (
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M3 4h14a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#c4883a" strokeWidth="1.5"/>
-                          <path d="M2 6l8 6 8-6" stroke="#c4883a" strokeWidth="1.5"/>
-                        </svg>
-                      ),
-                      title: 'We Receive Your Enquiry',
-                      desc: 'Our team will review your requirements.',
-                    },
-                    {
-                      icon: (
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <rect x="3" y="2" width="14" height="16" rx="2" stroke="#c4883a" strokeWidth="1.5"/>
-                          <path d="M7 7h6M7 11h4" stroke="#c4883a" strokeWidth="1.5" strokeLinecap="round"/>
-                        </svg>
-                      ),
-                      title: 'Get a Tailored Quote',
-                      desc: "We'll prepare the best possible quotation for you.",
-                    },
-                    {
-                      icon: (
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M3 4h14a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="#c4883a" strokeWidth="1.5"/>
-                          <path d="M2 6l8 6 8-6" stroke="#c4883a" strokeWidth="1.5"/>
-                        </svg>
-                      ),
-                      title: "We'll Get Back to You",
-                      desc: "You'll receive our response via email or phone.",
-                    },
-                  ].map(({ icon, title, desc }) => (
-                    <div key={title} className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#f5e8d0] flex items-center justify-center shrink-0">
-                        {icon}
-                      </div>
-                      <div>
-                        <p className="text-[#1a1a1a] font-semibold text-sm">{title}</p>
-                        <p className="text-[#5a5550] text-xs mt-0.5">{desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Submit button — shows demo message */}
-              <div>
-                <button
-                  className="w-full flex items-center justify-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] text-white font-bold text-sm py-3.5 rounded-xl transition-all cursor-pointer shadow-md"
-                  onClick={() => {
-                    // Demo only — no submission
-                    alert('Demo preview — this enquiry has not been sent.\n\nIn a real implementation, this would submit the enquiry.');
-                  }}
-                >
-                  Submit Enquiry
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-                <div className="flex items-center justify-center gap-1.5 mt-2">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <circle cx="6" cy="6" r="5" stroke="#9a9490" strokeWidth="1"/>
-                    <path d="M6 4v2.5L7.5 8" stroke="#9a9490" strokeWidth="1" strokeLinecap="round"/>
-                  </svg>
-                  <p className="text-[#9a9490] text-xs text-center">
-                    Your information is secure and will only be used for this enquiry.
-                  </p>
+              {/* No fake "Submit Enquiry" or quotation response promises. */}
+              <div className="rounded-xl border border-[#ead5af] bg-[#fffaf3] p-5">
+                <h3 className="mb-3 text-base font-bold text-[#1a1a1a]">Your enquiry is ready to preview</h3>
+                <p className="mb-4 text-sm leading-6 text-[#5a5550]">
+                  This is an interactive website concept. No manufacturer has received your details.
+                  You can edit the sample request, copy it or download a text summary.
+                </p>
+                <div className="grid gap-2">
+                  <button type="button" onClick={handleCopy}
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#c4883a] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#ac742e]">
+                    {copyState === 'copied' ? <Check size={16} /> : <Copy size={16} />}
+                    {copyState === 'copied' ? 'Copied to Clipboard' : 'Copy Enquiry Summary'}
+                  </button>
+                  <button type="button" onClick={handleDownload}
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#dfceb4] bg-white px-4 py-2.5 text-sm font-bold text-[#755024] hover:bg-[#f8f1e5]">
+                    <Download size={16} /> Download Enquiry (.txt)
+                  </button>
+                  <p className="pt-1 text-center text-xs text-[#886c43]">For demonstration only — no data is transmitted.</p>
                 </div>
               </div>
             </aside>

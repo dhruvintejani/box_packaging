@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Trash2, Minus, Plus, ChevronLeft, ChevronRight, Leaf } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight, Leaf } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 import StepIndicator from '../components/StepIndicator';
 import Modal from '../components/Modal';
+import DemoBanner from '../components/DemoBanner';
+import QuantityControl from '../components/QuantityControl';
 import { products, getProductById } from '../data/products';
 import { useEnquiry } from '../context/EnquiryContext';
 import type { PlyPreference, PrintingPreference } from '../types/enquiry';
@@ -18,7 +20,7 @@ const STEPS = [
   { number: 1, label: 'Select Products' },
   { number: 2, label: 'Specify Requirements' },
   { number: 3, label: 'Your Details' },
-  { number: 4, label: 'Review & Submit' },
+  { number: 4, label: 'Preview Enquiry' },
 ];
 
 const PLY_OPTIONS: { value: PlyPreference; label: string }[] = [
@@ -39,10 +41,13 @@ const STEP1_PRODUCTS = products;
 
 const customerSchema = z
   .object({
-    contactName: z.string().min(1, 'Contact name is required.'),
-    companyName: z.string().min(1, 'Company name is required.'),
-    email: z.string().email('Enter a valid email address.').optional().or(z.literal('')),
-    phone: z.string().optional(),
+    contactName: z.string().trim().min(1, 'Contact name is required.'),
+    companyName: z.string().trim().min(1, 'Company name is required.'),
+    email: z.string().trim().email('Enter a valid email address.').optional().or(z.literal('')), 
+    phone: z.string().trim().refine(
+      (value) => value === '' || (/^[+()0-9\s.\-]+$/.test(value) && value.replace(/\D/g, '').length >= 6 && value.replace(/\D/g, '').length <= 15),
+      'Enter a valid phone number (6–15 digits).'
+    ).optional(),
     deliveryCity: z.string().optional(),
   })
   .refine(
@@ -70,7 +75,10 @@ export default function Quote() {
     selectedCount,
   } = useEnquiry();
 
-  const [currentStep, setCurrentStep] = useState(locationState?.returnStep ?? 1);
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (selectedCount === 0) return 1;
+    return locationState?.returnStep === 3 ? 3 : 2;
+  });
   const [showClearModal, setShowClearModal] = useState(false);
   const [step1Error, setStep1Error] = useState('');
 
@@ -122,11 +130,11 @@ export default function Quote() {
     if (!valid) return;
     const values = getValues();
     updateCustomerDetails({
-      contactName: values.contactName,
-      companyName: values.companyName,
-      email: values.email ?? '',
-      phone: values.phone ?? '',
-      deliveryCity: values.deliveryCity ?? '',
+      contactName: values.contactName.trim(),
+      companyName: values.companyName.trim(),
+      email: values.email?.trim() ?? '',
+      phone: values.phone?.trim() ?? '',
+      deliveryCity: values.deliveryCity?.trim() ?? '',
     });
     navigate('/quote/preview');
   };
@@ -137,24 +145,13 @@ export default function Quote() {
     setCurrentStep(1);
   };
 
-  const handleQuantityChange = (productId: string, delta: number) => {
-    const current = enquiry.specifications[productId]?.quantity ?? 1;
-    const next = Math.max(1, current + delta);
-    updateSpecifications(productId, { quantity: next });
-  };
-
-  const handleQuantityInput = (productId: string, raw: string) => {
-    const parsed = parseInt(raw, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      updateSpecifications(productId, { quantity: parsed });
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1 pt-[70px]">
+        <DemoBanner />
         {/* Hero */}
         <PageHero
           breadcrumbs={[
@@ -163,7 +160,7 @@ export default function Quote() {
           ]}
           title="Request a"
           titleAccent="Quote"
-          subtitle="Tell us what you need. We'll get back to you with a tailored quote as soon as possible."
+          subtitle="Explore a guided packaging enquiry using sample details. Preview, copy or download the result without sending anything."
           image="/images/corrugated-stack.jpg"
           taglineLines={['BETTER', 'PACKAGING', 'BRIGHTER', 'TOMORROW']}
         />
@@ -187,7 +184,7 @@ export default function Quote() {
                     exit={{ opacity: 0, x: 16 }}
                     transition={{ duration: 0.22 }}
                   >
-                    <div className="flex items-start justify-between mb-6 gap-4">
+                    <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                       <div>
                         <h2 className="text-[#1a1a1a] font-extrabold text-2xl sm:text-3xl mb-1">
                           1. Select Products
@@ -198,7 +195,7 @@ export default function Quote() {
                       </div>
                       <button
                         onClick={() => navigate('/products')}
-                        className="flex items-center gap-1.5 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 self-start text-sm font-semibold text-[#9b6624] transition-colors hover:text-[#754719]"
                       >
                         <ChevronLeft size={16} />
                         Back to Products
@@ -255,7 +252,9 @@ export default function Quote() {
                                 loading="lazy"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
+                                  const img = e.currentTarget;
+                                  img.onerror = null;
+                                  img.src = '/images/product-custom-box.jpg';
                                 }}
                               />
                             </div>
@@ -271,16 +270,16 @@ export default function Quote() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => setShowClearModal(true)}
-                        className="text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         Cancel Enquiry
                       </button>
                       <button
                         onClick={handleStep1Next}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] sm:w-auto"
                       >
                         Next: Specify Requirements
                         <ChevronRight size={16} />
@@ -298,7 +297,7 @@ export default function Quote() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.22 }}
                   >
-                    <div className="flex items-start justify-between mb-6 gap-4">
+                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h2 className="text-[#1a1a1a] font-extrabold text-2xl sm:text-3xl mb-1">
                           2. Specify Requirements
@@ -309,10 +308,10 @@ export default function Quote() {
                       </div>
                       <button
                         onClick={() => goToStep(1)}
-                        className="flex items-center gap-1 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex min-h-11 items-center gap-1 self-start rounded-lg px-3 py-2 text-sm font-semibold text-[#9b6624] hover:bg-[#f8f1e5] hover:text-[#754719]"
                       >
                         <ChevronLeft size={14} />
-                        Back
+                        Add more products
                       </button>
                     </div>
 
@@ -362,41 +361,14 @@ export default function Quote() {
 
                               {/* Spec fields */}
                               <div className="p-4 sm:p-6">
-                                {/* Quantity */}
+                                {/* One shared control for keyboard, touch, manual entry and +/- */}
                                 <div className="mb-5">
-                                  <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
-                                    Quantity <span className="text-red-500">*</span>
-                                  </label>
-                                  <div className="flex items-center gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleQuantityChange(productId, -100)}
-                                      className="w-9 h-9 rounded border border-[#e5e0d8] flex items-center justify-center text-[#1a1a1a] hover:border-[#c4883a] hover:text-[#c4883a] transition-colors cursor-pointer"
-                                      aria-label="Decrease quantity"
-                                    >
-                                      <Minus size={14} />
-                                    </button>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      value={specs.quantity}
-                                      onChange={(e) => handleQuantityInput(productId, e.target.value)}
-                                      className="w-24 text-center border border-[#e5e0d8] rounded py-2 text-sm focus:outline-none focus:border-[#c4883a] focus:ring-1 focus:ring-[#c4883a]/30"
-                                      aria-label="Quantity"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleQuantityChange(productId, 100)}
-                                      className="w-9 h-9 rounded border border-[#e5e0d8] flex items-center justify-center text-[#1a1a1a] hover:border-[#c4883a] hover:text-[#c4883a] transition-colors cursor-pointer"
-                                      aria-label="Increase quantity"
-                                    >
-                                      <Plus size={14} />
-                                    </button>
-                                    <span className="text-[#9a9490] text-sm ml-1">pcs</span>
-                                  </div>
+                                  <QuantityControl quantity={specs.quantity}
+                                    onChange={(quantity) => updateSpecifications(productId, { quantity })}
+                                    label={`Quantity for ${product.name}`} />
                                 </div>
 
-                                {/* Dimensions */}
+                                                                {/* Dimensions */}
                                 <div className="mb-5">
                                   <label className="block text-sm font-semibold text-[#1a1a1a] mb-1">
                                     Dimensions (mm) — optional
@@ -516,10 +488,10 @@ export default function Quote() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between mt-8">
+                    <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => goToStep(1)}
-                        className="flex items-center gap-1 text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center gap-1 rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         <ChevronLeft size={14} />
                         Back
@@ -527,7 +499,7 @@ export default function Quote() {
                       <button
                         onClick={handleStep2Next}
                         disabled={enquiry.selectedProductIds.length === 0}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                       >
                         Next: Your Details
                         <ChevronRight size={16} />
@@ -545,25 +517,25 @@ export default function Quote() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.22 }}
                   >
-                    <div className="flex items-start justify-between mb-6 gap-4">
+                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h2 className="text-[#1a1a1a] font-extrabold text-2xl sm:text-3xl mb-1">
                           3. Your Details
                         </h2>
                         <p className="text-[#5a5550] text-sm">
-                          Enter your contact information so we can get back to you.
+                          Use sample contact information to see how your request would look. Nothing is submitted.
                         </p>
                       </div>
                       <button
                         onClick={() => goToStep(2)}
-                        className="flex items-center gap-1 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-[#9b6624] transition-colors hover:text-[#754719]"
                       >
                         <ChevronLeft size={14} />
                         Back
                       </button>
                     </div>
 
-                    <form className="space-y-5 max-w-xl" noValidate>
+                    <form className="space-y-5 max-w-xl" noValidate onSubmit={(e) => { e.preventDefault(); void handleStep3Next(); }}>
                       {/* Contact Name */}
                       <div>
                         <label htmlFor="contactName" className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
@@ -651,8 +623,11 @@ export default function Quote() {
                           type="tel"
                           autoComplete="tel"
                           {...register('phone')}
+                          aria-invalid={!!errors.phone}
+                          aria-describedby={errors.phone ? 'phone-error' : undefined}
                           className="w-full border border-[#e5e0d8] rounded py-2.5 px-3 text-sm focus:outline-none focus:border-[#c4883a] focus:ring-1 focus:ring-[#c4883a]/30 transition-colors"
                         />
+                        {errors.phone && <p role="alert" id="phone-error" className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
                       </div>
 
                       {/* Delivery City */}
@@ -670,17 +645,17 @@ export default function Quote() {
                       </div>
                     </form>
 
-                    <div className="flex items-center justify-between mt-8">
+                    <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => goToStep(2)}
-                        className="flex items-center gap-1 text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center gap-1 rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         <ChevronLeft size={14} />
                         Back
                       </button>
                       <button
                         onClick={handleStep3Next}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] sm:w-auto"
                       >
                         Preview Enquiry
                         <ChevronRight size={16} />
@@ -724,27 +699,19 @@ export default function Quote() {
                               src={product.image}
                               alt={product.name}
                               className="w-full h-full object-cover"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                img.onerror = null;
+                                img.src = '/images/product-custom-box.jpg';
+                              }}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[#1a1a1a] font-semibold text-xs leading-snug truncate">{product.name}</p>
-                            <div className="flex items-center gap-1 mt-1">
-                              <button
-                                onClick={() => handleQuantityChange(pid, -100)}
-                                className="w-5 h-5 rounded border border-[#e5e0d8] flex items-center justify-center text-[#5a5550] hover:border-[#c4883a] cursor-pointer text-xs"
-                                aria-label="Decrease quantity"
-                              >
-                                <Minus size={10} />
-                              </button>
-                              <span className="text-xs text-[#5a5550] min-w-[2.5rem] text-center">{specs.quantity}</span>
-                              <button
-                                onClick={() => handleQuantityChange(pid, 100)}
-                                className="w-5 h-5 rounded border border-[#e5e0d8] flex items-center justify-center text-[#5a5550] hover:border-[#c4883a] cursor-pointer"
-                                aria-label="Increase quantity"
-                              >
-                                <Plus size={10} />
-                              </button>
+                            <div className="mt-2">
+                              <QuantityControl quantity={specs.quantity} compact
+                                onChange={(quantity) => updateSpecifications(pid, { quantity })}
+                                label={`Quantity for ${product.name} in summary`} />
                             </div>
                           </div>
                           <button
@@ -770,15 +737,15 @@ export default function Quote() {
                     </svg>
                   </div>
                   <div>
-                    <h4 className="font-bold text-[#1a1a1a] text-sm mb-1">Need Help?</h4>
+                    <h4 className="font-bold text-[#1a1a1a] text-sm mb-1">Need another product?</h4>
                     <p className="text-[#5a5550] text-xs leading-relaxed mb-3">
-                      Have specific requirements or need guidance? We're here to help.
+                      The preview is flexible: add more items or write requirements in the notes.
                     </p>
-                    <button className="flex items-center gap-1.5 text-xs font-semibold text-[#1a1a1a] border border-[#e5e0d8] bg-white px-3 py-2 rounded hover:border-[#c4883a] transition-colors cursor-pointer">
+                    <button type="button" onClick={() => goToStep(1)} className="flex min-h-11 items-center gap-1.5 rounded-lg border border-[#e5e0d8] bg-white px-3 py-2 text-xs font-semibold text-[#1a1a1a] transition-colors hover:border-[#c4883a]">
                       <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                         <path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zM7 10.5v-3M7 6V4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                       </svg>
-                      Contact Us
+                      Browse catalogue
                     </button>
                   </div>
                 </div>

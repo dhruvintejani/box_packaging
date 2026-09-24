@@ -1,3 +1,5 @@
+import { imageUrl } from '../utils/images';
+
 interface PageHeroProps {
   breadcrumbs?: Array<{ label: string; href?: string }>;
   title: string;
@@ -22,7 +24,7 @@ export default function PageHero({
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-40"
-        style={{ backgroundImage: `url(${image})` }}
+        style={{ backgroundImage: `url(${imageUrl(image)})` }}
         aria-hidden="true"
       />
       {/* Gradient overlay */}

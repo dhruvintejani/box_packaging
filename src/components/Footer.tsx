@@ -34,7 +34,7 @@ export default function Footer() {
               {[
                 { to: '/', label: 'Home' },
                 { to: '/products', label: 'Products' },
-                { to: '/quote', label: 'Request a Quote' },
+                { to: '/quote', label: 'Build a Sample Enquiry' },
               ].map(({ to, label }) => (
                 <li key={to}>
                   <Link
@@ -62,13 +62,13 @@ export default function Footer() {
 
           {/* Get in Touch */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-2">Get in Touch</h3>
-            <p className="text-sm text-[#9a9490] mb-4">Let's build better packaging together.</p>
+            <h3 className="text-sm font-semibold text-white mb-2">Explore the Demo</h3>
+            <p className="text-sm text-[#9a9490] mb-4">Try a guided packaging quotation using sample information.</p>
             <button
               onClick={() => navigate('/quote')}
               className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white text-sm font-semibold px-4 py-2.5 rounded transition-all duration-150 cursor-pointer"
             >
-              Start an Enquiry
+              Try the Enquiry Demo
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -88,14 +88,10 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-[#2d2d2d]">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[#9a9490] text-xs">© 2024 PACKFORM. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <span className="text-[#9a9490] text-xs cursor-default hover:text-white transition-colors">Privacy Policy</span>
-            <span className="text-[#2d2d2d]">|</span>
-            <span className="text-[#9a9490] text-xs cursor-default hover:text-white transition-colors">Terms of Service</span>
-            <span className="text-[#2d2d2d]">|</span>
-            <span className="text-[#9a9490] text-xs cursor-default hover:text-white transition-colors">Contact</span>
-          </div>
+          <p className="text-[#9a9490] text-xs">© 2026 PACKFORM • Packaging website concept.</p>
+          <p className="text-xs leading-5 text-[#b6a99a] text-center sm:text-right">
+            Concept by PixelAura Technologies • All interactions are simulated; no enquiry is sent.
+          </p>
         </div>
       </div>
     </footer>
