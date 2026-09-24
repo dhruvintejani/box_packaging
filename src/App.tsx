@@ -6,6 +6,7 @@ import Products from './pages/Products';
 import ProductDetails from './pages/ProductDetails';
 import Quote from './pages/Quote';
 import EnquiryPreview from './pages/EnquiryPreview';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/products/:slug" element={<ProductDetails />} />
           <Route path="/quote" element={<Quote />} />
           <Route path="/quote/preview" element={<EnquiryPreview />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </EnquiryProvider>
     </BrowserRouter>
