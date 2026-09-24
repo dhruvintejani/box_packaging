@@ -69,7 +69,7 @@ export default function Header() {
             </div>
             <div>
               <div className="text-[#1a1a1a] font-extrabold text-lg leading-tight tracking-tight transition-colors group-hover:text-[#946026]">PACKFORM</div>
-              <div className="text-[#9a9490] text-[9px] uppercase tracking-widest leading-tight font-medium">
+              <div className="hidden text-[#9a9490] text-[9px] uppercase tracking-widest leading-tight font-medium min-[400px]:block">
                 Packaging for a Brighter Tomorrow
               </div>
             </div>
