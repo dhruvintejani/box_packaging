@@ -8,8 +8,8 @@ import DemoBanner from '../components/DemoBanner';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 import ProductCard from '../components/ProductCard';
+import PremiumSelect from '../components/PremiumSelect';
 import { products, productCategories } from '../data/products';
-import type { ProductCategory } from '../types/product';
 
 type SortOption = 'featured' | 'name-asc' | 'name-desc';
 
@@ -18,6 +18,12 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'name-asc', label: 'Name A–Z' },
   { value: 'name-desc', label: 'Name Z–A' },
 ];
+
+const CATEGORY_OPTIONS = productCategories.map((category) => ({
+  value: category,
+  label: category === 'All' ? 'All products' : category,
+  description: category === 'All' ? 'Explore the complete sample catalogue' : undefined,
+}));
 
 export default function Products() {
 
@@ -86,50 +92,37 @@ export default function Products() {
   const hasActiveFilters = search !== '' || selectedCategory !== 'All' || sortBy !== 'featured';
 
   const renderFilterSidebar = (mobile: boolean) => (
-    <aside aria-label="Product filters">
-      <h2 className="text-[#1a1a1a] font-bold text-base mb-4">Filter Products</h2>
-
-      {/* Product Type */}
-      <div className="mb-6">
-        <h3 className="text-[#1a1a1a] font-semibold text-sm mb-3">Product Type</h3>
-        <div className="space-y-2">
-          {productCategories.map((cat) => {
-            const isAll = cat === 'All';
-            const isChecked = isAll ? selectedCategory === 'All' : selectedCategory === cat;
-            return (
-              <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
-                <input
-                  type="radio"
-                  name={mobile ? 'mobile-category' : 'desktop-category'}
-                  checked={isChecked}
-                  onChange={() => setSelectedCategory(isAll ? 'All' : (cat as ProductCategory))}
-                  className="w-4 h-4 rounded border-[#c0bab2] accent-[#c4883a] cursor-pointer"
-                  aria-label={`Filter by ${cat}`}
-                />
-                <span className={`text-sm ${isChecked ? 'text-[#1a1a1a] font-medium' : 'text-[#5a5550]'} group-hover:text-[#1a1a1a] transition-colors`}>
-                  {isAll ? 'All Products' : cat}
-                </span>
-              </label>
-            );
-          })}
-        </div>
+    <aside aria-label={mobile ? 'Mobile product filters' : 'Product filters'}
+      className="rounded-2xl border border-[#e8dfd2] bg-gradient-to-b from-[#fffcf8] to-white p-4 shadow-sm">
+      <div className="mb-5 border-b border-[#ece5da] pb-4">
+        <h2 className="text-base font-extrabold tracking-tight text-[#28231f]">Refine your search</h2>
+        <p className="mt-1 text-xs leading-5 text-[#756b5f]">
+          Discover the right box for your packaging requirements.
+        </p>
       </div>
-
-      {/* Apply / Clear */}
-      <div className="space-y-2 pt-2">
-        <button
-          onClick={() => setMobileFiltersOpen(false)}
-          className="lg:hidden w-full bg-[#c4883a] hover:bg-[#b07a30] text-white text-sm font-semibold py-2.5 rounded transition-all cursor-pointer"
-        >
-          Close Filters
-        </button>
+      <div className="mb-5">
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.11em] text-[#837565]">Product category</p>
+        <PremiumSelect
+          value={selectedCategory} label="Product category"
+          options={CATEGORY_OPTIONS}
+          onChange={(value) => setSelectedCategory(value)}
+        />
+      </div>
+      <div className="flex flex-wrap gap-2 border-t border-[#ece5da] pt-4">
         {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="w-full text-[#c4883a] hover:text-[#b07a30] text-sm font-semibold py-2 transition-colors cursor-pointer"
-          >
-            Clear All
+          <button type="button" onClick={clearFilters}
+            className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl border border-[#d8c3a6] bg-white px-3 text-sm font-bold text-[#8b5923] transition-colors hover:bg-[#fff2df]">
+            Clear filters
           </button>
+        )}
+        {mobile && (
+          <button type="button" onClick={() => setMobileFiltersOpen(false)}
+            className="inline-flex min-h-10 flex-1 items-center justify-center rounded-xl bg-[#a46c29] px-3 text-sm font-bold text-white transition-colors hover:bg-[#82521d]">
+            Show {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+          </button>
+        )}
+        {!mobile && !hasActiveFilters && (
+          <p className="text-xs leading-5 text-[#85796d]">Showing all categories</p>
         )}
       </div>
     </aside>
@@ -234,34 +227,23 @@ export default function Products() {
             {/* Main content */}
             <div className="flex-1 min-w-0">
               {/* Toolbar */}
-              <div className="flex items-center justify-between mb-6 gap-4">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-[#1a1a1a] font-semibold text-sm">
                   {filteredProducts.length}{' '}
                   <span className="font-normal text-[#5a5550]">
                     {filteredProducts.length === 1 ? 'product' : 'products'}
                   </span>
                 </p>
-                <div className="flex items-center gap-2">
-                  <label htmlFor="sort-select" className="text-sm text-[#5a5550] hidden sm:inline">
-                    Sort by
-                  </label>
-                  <select
-                    id="sort-select"
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="hidden shrink-0 text-xs font-semibold text-[#817569] sm:inline">Sort by</span>
+                  <PremiumSelect
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="border border-[#e5e0d8] rounded-lg text-sm py-1.5 px-3 pr-8 focus:outline-none focus:border-[#c4883a] bg-white cursor-pointer text-[#1a1a1a] appearance-none"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%235a5550' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 8px center',
-                    }}
-                  >
-                    {SORT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => setSortBy(value as SortOption)}
+                    options={SORT_OPTIONS}
+                    label="Sort products"
+                    compact
+                    className="w-[158px] sm:w-[172px]"
+                  />
                 </div>
               </div>
 
