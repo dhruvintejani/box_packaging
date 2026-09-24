@@ -1,4 +1,5 @@
 import { imageUrl } from '../utils/images';
+import { Link } from 'react-router-dom';
 
 interface PageHeroProps {
   breadcrumbs?: Array<{ label: string; href?: string }>;
@@ -34,14 +35,30 @@ export default function PageHero({
         {/* Breadcrumbs */}
         {breadcrumbs && (
           <nav className="flex items-center gap-2 mb-3" aria-label="Breadcrumb">
-            {breadcrumbs.map((crumb, i) => (
-              <span key={i} className="flex items-center gap-2">
-                {i > 0 && <span className="text-[#9a9490] text-sm">›</span>}
-                <span className={`text-sm ${i === breadcrumbs.length - 1 ? 'text-white' : 'text-[#9a9490]'}`}>
-                  {crumb.label}
+            {breadcrumbs.map((crumb, i) => {
+              const current = i === breadcrumbs.length - 1;
+              const destination = crumb.href ?? (
+                crumb.label === 'Home' ? '/' :
+                crumb.label === 'Products' ? '/products' :
+                crumb.label === 'Request a Quote' ? '/quote' : undefined
+              );
+              return (
+                <span key={i} className="flex min-w-0 items-center gap-2">
+                  {i > 0 && <span aria-hidden="true" className="text-sm text-[#b1a397]">›</span>}
+                  {!current && destination ? (
+                    <Link to={destination}
+                      className="rounded-md py-1 text-sm text-[#ddd2c3] underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c4883a]">
+                      {crumb.label}
+                    </Link>
+                  ) : (
+                    <span aria-current={current ? 'page' : undefined}
+                      className={`min-w-0 truncate text-sm ${current ? 'font-bold text-white' : 'text-[#d5c8b8]'}`}>
+                      {crumb.label}
+                    </span>
+                  )}
                 </span>
-              </span>
-            ))}
+              );
+            }
           </nav>
         )}
 
