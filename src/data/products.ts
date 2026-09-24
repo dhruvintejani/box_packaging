@@ -1,6 +1,8 @@
 import type { Product } from '../types/product';
 
-// Fifteen curated sample products. All imagery is served from our local box-photo library.\n// Images for specialty variants are representative, not exact manufacturing specifications.\nexport const products: Product[] = [
+// Fifteen curated sample products. All imagery is served from our local box-photo library.
+// Images for specialty variants are representative, not exact manufacturing specifications.
+export const products: Product[] = [
   {
     id: 'standard-shipping-carton',
     name: 'Standard Shipping Carton',
