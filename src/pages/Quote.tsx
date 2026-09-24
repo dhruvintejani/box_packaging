@@ -41,10 +41,13 @@ const STEP1_PRODUCTS = products;
 
 const customerSchema = z
   .object({
-    contactName: z.string().min(1, 'Contact name is required.'),
-    companyName: z.string().min(1, 'Company name is required.'),
-    email: z.string().email('Enter a valid email address.').optional().or(z.literal('')),
-    phone: z.string().optional(),
+    contactName: z.string().trim().min(1, 'Contact name is required.'),
+    companyName: z.string().trim().min(1, 'Company name is required.'),
+    email: z.string().trim().email('Enter a valid email address.').optional().or(z.literal('')), 
+    phone: z.string().trim().refine(
+      (value) => value === '' || (/^[+()0-9\s.\-]+$/.test(value) && value.replace(/\D/g, '').length >= 6 && value.replace(/\D/g, '').length <= 15),
+      'Enter a valid phone number (6–15 digits).'
+    ).optional(),
     deliveryCity: z.string().optional(),
   })
   .refine(
@@ -127,11 +130,11 @@ export default function Quote() {
     if (!valid) return;
     const values = getValues();
     updateCustomerDetails({
-      contactName: values.contactName,
-      companyName: values.companyName,
-      email: values.email ?? '',
-      phone: values.phone ?? '',
-      deliveryCity: values.deliveryCity ?? '',
+      contactName: values.contactName.trim(),
+      companyName: values.companyName.trim(),
+      email: values.email?.trim() ?? '',
+      phone: values.phone?.trim() ?? '',
+      deliveryCity: values.deliveryCity?.trim() ?? '',
     });
     navigate('/quote/preview');
   };
@@ -618,8 +621,11 @@ export default function Quote() {
                           type="tel"
                           autoComplete="tel"
                           {...register('phone')}
+                          aria-invalid={!!errors.phone}
+                          aria-describedby={errors.phone ? 'phone-error' : undefined}
                           className="w-full border border-[#e5e0d8] rounded py-2.5 px-3 text-sm focus:outline-none focus:border-[#c4883a] focus:ring-1 focus:ring-[#c4883a]/30 transition-colors"
                         />
+                        {errors.phone && <p role="alert" id="phone-error" className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
                       </div>
 
                       {/* Delivery City */}
