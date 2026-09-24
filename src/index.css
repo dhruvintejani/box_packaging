@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-charcoal: #1a1a1a;
+    --color-charcoal-light: #2d2d2d;
+    --color-kraft: #c4883a;
+    --color-kraft-light: #d4983e;
+    --color-kraft-muted: #f5e8d0;
+    --color-off-white: #f8f6f2;
+    --color-warm-gray: #f0ece4;
+    --color-border: #e5e0d8;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #5a5550;
+    --color-text-muted: #9a9490;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background-color: #ffffff;
+    color: var(--color-text-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  input, select, textarea {
+    font-family: inherit;
+  }
+}
+
+@layer utilities {
+  .bg-charcoal { background-color: var(--color-charcoal); }
+  .bg-charcoal-light { background-color: var(--color-charcoal-light); }
+  .bg-kraft { background-color: var(--color-kraft); }
+  .bg-kraft-muted { background-color: var(--color-kraft-muted); }
+  .bg-off-white { background-color: var(--color-off-white); }
+  .bg-warm-gray { background-color: var(--color-warm-gray); }
+  .text-kraft { color: var(--color-kraft); }
+  .text-charcoal { color: var(--color-charcoal); }
+  .text-secondary { color: var(--color-text-secondary); }
+  .text-muted { color: var(--color-text-muted); }
+  .border-kraft { border-color: var(--color-kraft); }
+  .border-warm { border-color: var(--color-border); }
+
+  .focus-ring {
+    outline: 2px solid var(--color-kraft);
+    outline-offset: 2px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-warm-gray);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-kraft);
+  border-radius: 3px;
+}
+
+/* Image fallback */
+img[alt]::after {
+  content: attr(alt);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-warm-gray);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
