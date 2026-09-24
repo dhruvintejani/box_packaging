@@ -163,7 +163,7 @@ export default function EnquiryPreview() {
               ) : (
                 <div className="border border-[#e5e0d8] rounded-xl overflow-hidden">
                   {/* Table header */}
-                  <div className="hidden sm:grid sm:grid-cols-[1fr_1fr_auto_auto] bg-[#f8f6f2] border-b border-[#e5e0d8] px-4 py-3">
+                  <div className="hidden border-b border-[#e5e0d8] bg-[#f8f6f2] px-4 py-3 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:gap-x-2">
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Product</span>
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Specifications</span>
                     <span className="text-xs font-semibold text-[#5a5550] uppercase tracking-wide">Quantity</span>
@@ -181,7 +181,7 @@ export default function EnquiryPreview() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className="flex flex-col sm:grid sm:grid-cols-[1fr_1fr_auto_auto] gap-4 sm:gap-0 p-4 border-b border-[#e5e0d8] last:border-0 items-start sm:items-center"
+                        className="flex flex-col gap-4 border-b border-[#e5e0d8] p-4 last:border-0 sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-x-2"
                       >
                         {/* Product info */}
                         <div className="flex items-center gap-3">
@@ -192,9 +192,9 @@ export default function EnquiryPreview() {
                               className="w-full h-full object-cover"
                               loading="lazy"
                               onError={(e) => {
-                                const t = e.target as HTMLImageElement;
-                                t.style.display = 'none';
-                                t.parentElement!.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📦</div>';
+                                const image = e.currentTarget;
+                                image.onerror = null;
+                                image.src = '/images/product-custom-box.jpg';
                               }}
                             />
                           </div>
