@@ -58,7 +58,7 @@ export default function PageHero({
                   )}
                 </span>
               );
-            }
+            })}
           </nav>
         )}
 
