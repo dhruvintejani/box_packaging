@@ -15,6 +15,8 @@ export default function ProductDetails() {
   const product = products.find((entry) => entry.slug === slug || entry.id === slug);
   const { enquiry, addProduct, isSelected, updateSpecifications } = useEnquiry();
   const [imgError, setImgError] = useState(false);
+  // Changing the number should never silently add a product to the enquiry.
+  const [draftQuantities, setDraftQuantities] = useState<Record<string, number>>({});
   useEffect(() => setImgError(false), [slug]);
 
   if (!product) {
@@ -38,11 +40,13 @@ export default function ProductDetails() {
   }
 
   const selected = isSelected(product.id);
-  const qty = enquiry.specifications[product.id]?.quantity ?? 100;
+  const qty = draftQuantities[product.id] ?? enquiry.specifications[product.id]?.quantity ?? 100;
   const related = products.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
 
   const addAndQuote = () => {
+    // Commit the pending amount only after an explicit user action.
     if (!selected) addProduct(product.id);
+    updateSpecifications(product.id, { quantity: qty });
     navigate('/quote');
   };
 
@@ -83,21 +87,19 @@ export default function ProductDetails() {
               </div>
               {selected && (
                 <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-green-700" role="status">
-                  <Check size={18} /> Added to your enquiry
+                  <Check size={18} /> Already in your enquiry. Changes are saved when you continue.
                 </div>
               )}
               <div className="mb-7">
                 <QuantityControl quantity={qty}
-                  onChange={(quantity) => {
-                    if (!selected) addProduct(product.id);
-                    updateSpecifications(product.id, { quantity });
-                  }}
+                  onChange={(quantity) => setDraftQuantities((previous) => ({ ...previous, [product.id]: quantity }))}
                   label={`Quantity for ${product.name}`} />
+                <p className="mt-2 text-xs leading-5 text-[#796e61]">Adjusting quantity does not add the product. Your choice is saved only when you continue.</p>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button type="button" onClick={addAndQuote}
                   className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#c4883a] px-5 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#ae742c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c4883a] sm:w-auto">
-                  <ClipboardList size={18} /> {selected ? 'Continue to Enquiry' : 'Add to Enquiry'} <ArrowRight size={16} />
+                  <ClipboardList size={18} /> Continue to Enquiry <ArrowRight size={16} />
                 </button>
                 <Link to="/products"
                   className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#d8cfbf] bg-white px-5 py-3 text-sm font-semibold text-[#1a1a1a] transition-colors hover:bg-[#f8f6f2] focus-visible:outline-2 sm:w-auto">
