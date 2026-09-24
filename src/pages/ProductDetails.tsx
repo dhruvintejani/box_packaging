@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, ClipboardList, PackageOpen } from 'lucide-react';
 import Header from '../components/Header';
@@ -15,6 +15,7 @@ export default function ProductDetails() {
   const product = products.find((entry) => entry.slug === slug || entry.id === slug);
   const { enquiry, addProduct, isSelected, updateSpecifications } = useEnquiry();
   const [imgError, setImgError] = useState(false);
+  useEffect(() => setImgError(false), [slug]);
 
   if (!product) {
     return (
@@ -71,7 +72,7 @@ export default function ProductDetails() {
             </div>
             <div className="min-w-0">
               <span className="mb-3 inline-block rounded-full bg-[#f5e8d0] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#986425]">{product.category}</span>
-              <h1 className="mb-4 text-3xl font-extrabold leading-tight text-[#1a1a1a] sm:text-4xl">{product.name}</h1>
+              <h2 className="mb-4 text-3xl font-extrabold leading-tight text-[#1a1a1a] sm:text-4xl">{product.name}</h2>
               <p className="mb-6 max-w-xl text-base leading-7 text-[#5a5550]">{product.description}</p>
               <div className="mb-7 rounded-xl border border-[#eadbc3] bg-[#fffaf3] p-4">
                 <h2 className="mb-2 text-sm font-bold text-[#1a1a1a]">Customised to your requirements</h2>
