@@ -252,7 +252,9 @@ export default function Quote() {
                                 loading="lazy"
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
+                                  const img = e.currentTarget;
+                                  img.onerror = null;
+                                  img.src = '/images/product-custom-box.jpg';
                                 }}
                               />
                             </div>
@@ -697,7 +699,11 @@ export default function Quote() {
                               src={product.image}
                               alt={product.name}
                               className="w-full h-full object-cover"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              onError={(e) => {
+                                const img = e.currentTarget;
+                                img.onerror = null;
+                                img.src = '/images/product-custom-box.jpg';
+                              }}
                             />
                           </div>
                           <div className="flex-1 min-w-0">
