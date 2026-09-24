@@ -31,7 +31,7 @@ for (const size of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) 
     await page.getByRole('button', { name: /Decrease quantity for standard shipping carton/i }).click();
     await expect(quantity).toHaveValue('17');
 
-    await page.getByRole('button', { name: 'Add to Enquiry' }).click();
+    await page.getByRole('button', { name: /Continue to Enquiry|Add to Enquiry/ }).click();
     await expect(page).toHaveURL(/\/quote$/);
     await expect(page.getByRole('heading', { name: '2. Specify Requirements' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '1. Select Products' })).toHaveCount(0);
@@ -82,7 +82,7 @@ test('preview can edit quantities, copy or download but never pretends to submit
   expect(file.suggestedFilename()).toBe('packform-enquiry.txt');
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.getByRole('button', { name: 'Copy Summary' }).click();
-  await expect(page.getByRole('button', { name: 'Copied' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Copied', exact: true })).toBeVisible();
   const clipboard = await page.evaluate(() => navigator.clipboard.readText());
   expect(clipboard).toContain('18 pcs');
   expect(clipboard).toContain('This request has NOT been submitted');
