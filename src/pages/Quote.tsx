@@ -192,7 +192,7 @@ export default function Quote() {
                       </div>
                       <button
                         onClick={() => navigate('/products')}
-                        className="flex items-center gap-1.5 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex min-h-11 shrink-0 items-center gap-1.5 self-start text-sm font-semibold text-[#9b6624] transition-colors hover:text-[#754719]"
                       >
                         <ChevronLeft size={16} />
                         Back to Products
@@ -265,16 +265,16 @@ export default function Quote() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => setShowClearModal(true)}
-                        className="text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         Cancel Enquiry
                       </button>
                       <button
                         onClick={handleStep1Next}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] sm:w-auto"
                       >
                         Next: Specify Requirements
                         <ChevronRight size={16} />
@@ -292,7 +292,7 @@ export default function Quote() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.22 }}
                   >
-                    <div className="flex items-start justify-between mb-6 gap-4">
+                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h2 className="text-[#1a1a1a] font-extrabold text-2xl sm:text-3xl mb-1">
                           2. Specify Requirements
@@ -483,10 +483,10 @@ export default function Quote() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between mt-8">
+                    <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => goToStep(1)}
-                        className="flex items-center gap-1 text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center gap-1 rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         <ChevronLeft size={14} />
                         Back
@@ -494,7 +494,7 @@ export default function Quote() {
                       <button
                         onClick={handleStep2Next}
                         disabled={enquiry.selectedProductIds.length === 0}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                       >
                         Next: Your Details
                         <ChevronRight size={16} />
@@ -512,7 +512,7 @@ export default function Quote() {
                     exit={{ opacity: 0, x: -16 }}
                     transition={{ duration: 0.22 }}
                   >
-                    <div className="flex items-start justify-between mb-6 gap-4">
+                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h2 className="text-[#1a1a1a] font-extrabold text-2xl sm:text-3xl mb-1">
                           3. Your Details
@@ -523,7 +523,7 @@ export default function Quote() {
                       </div>
                       <button
                         onClick={() => goToStep(2)}
-                        className="flex items-center gap-1 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                        className="inline-flex min-h-11 shrink-0 items-center gap-1 self-start text-sm font-semibold text-[#9b6624] transition-colors hover:text-[#754719]"
                       >
                         <ChevronLeft size={14} />
                         Back
@@ -637,17 +637,17 @@ export default function Quote() {
                       </div>
                     </form>
 
-                    <div className="flex items-center justify-between mt-8">
+                    <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         onClick={() => goToStep(2)}
-                        className="flex items-center gap-1 text-sm text-[#5a5550] hover:text-[#1a1a1a] border border-[#e5e0d8] px-4 py-2.5 rounded transition-colors cursor-pointer"
+                        className="flex min-h-11 w-full items-center justify-center gap-1 rounded-lg border border-[#e5e0d8] px-4 py-2.5 text-sm font-semibold text-[#5a5550] transition-colors hover:bg-[#f8f6f2] sm:w-auto"
                       >
                         <ChevronLeft size={14} />
                         Back
                       </button>
                       <button
                         onClick={handleStep3Next}
-                        className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white font-semibold px-6 py-2.5 rounded transition-all cursor-pointer shadow-sm"
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#976020] px-5 py-3 text-center text-sm font-bold leading-5 text-white shadow-sm transition-colors hover:bg-[#794919] sm:w-auto"
                       >
                         Preview Enquiry
                         <ChevronRight size={16} />
