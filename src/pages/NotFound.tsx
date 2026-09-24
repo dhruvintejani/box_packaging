@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex flex-1 flex-col pt-[70px]">
+      <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col pt-16 outline-none lg:pt-[70px]">
         <DemoBanner />
         <section className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
           <div className="mb-7 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#f5e8d0]">
