@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 async function openFirstProduct(page: Page) {
   await page.goto('/products');
   await expect(page.getByText('15 products')).toBeVisible();
-  await page.getByRole('button', { name: 'View Product' }).first().click();
+  await page.locator('[data-product-slug="standard-shipping-carton"]').getByRole('button', { name: 'View Standard Shipping Carton' }).click();
   await expect(page).toHaveURL(/\/products\/[^/]+$/);
   await expect(page.getByRole('heading', { name: 'Standard Shipping Carton' })).toBeVisible();
 }
@@ -106,7 +106,10 @@ test('all catalogue photos are local packaging images and filtering uses premium
   const cards = page.locator('img[loading="lazy"]');
   await expect(cards).toHaveCount(15);
   const localImages = await cards.evaluateAll((images) =>
-    images.every((image) => (image as HTMLImageElement).getAttribute('src')?.startsWith('data:image/jpeg;base64,'))
+    images.every((image) => {
+      const src = (image as HTMLImageElement).getAttribute('src') ?? '';
+      return src.startsWith('/images/') || src.startsWith('data:image/jpeg;base64,');
+    })
   );
   expect(localImages).toBeTruthy();
 
@@ -197,4 +200,113 @@ test('all 15 product-detail photographs render on mobile rather than a blank ima
       body.scrollWidth <= window.innerWidth + 2
     )).toBeTruthy();
   }
+});
+
+test('empty previews do not allow exporting blank enquiries', async ({ page }) => {
+  await page.goto('/quote/preview');
+  await expect(page.getByRole('heading', { name: 'Your sample enquiry is empty' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Copy|Download|Submit/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Select Packaging Products' }).click();
+  await expect(page).toHaveURL(/\/quote$/);
+  await expect(page.getByRole('heading', { name: '1. Select Products' })).toBeVisible();
+});
+
+test('legacy contact details are scrubbed and new contact details never enter local storage', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => window.localStorage.setItem('packform-enquiry', JSON.stringify({
+    selectedProductIds: ['standard-shipping-carton'],
+    specifications: { 'standard-shipping-carton': {
+      productId: 'standard-shipping-carton', quantity: 200,
+      length: '120', width: '110', height: '100',
+      plyPreference: 'not-sure', printing: 'not-sure',
+      whatWillBePacked: 'sensitive sample note',
+      additionalRequirements: 'sensitive free text'
+    }},
+    customerDetails: { contactName: 'Private Name', companyName: 'Private Co', email: 'private@example.com' },
+  })));
+  await page.reload();
+  const savedAfterMigration = await page.evaluate(() => window.localStorage.getItem('packform-enquiry') ?? '');
+  expect(savedAfterMigration).not.toContain('Private Name');
+  expect(savedAfterMigration).not.toContain('private@example.com');
+  expect(savedAfterMigration).not.toContain('sensitive free text');
+  expect(savedAfterMigration).toContain('standard-shipping-carton');
+
+  await page.goto('/quote');
+  await expect(page.getByRole('heading', { name: '2. Specify Requirements' })).toBeVisible();
+  await page.getByRole('button', { name: /Next: Your Details/i }).click();
+  await page.getByRole('textbox', { name: /Contact Name/i }).fill('Sample Visitor');
+  await page.getByRole('textbox', { name: /Company Name/i }).fill('Example Ltd');
+  await page.getByRole('textbox', { name: /Email Address/i }).fill('visitor@example.com');
+  await page.getByRole('button', { name: 'Preview Enquiry', exact: true }).click();
+  await expect(page).toHaveURL(/\/quote\/preview$/);
+  const savedAfterInput = await page.evaluate(() => window.localStorage.getItem('packform-enquiry') ?? '');
+  expect(savedAfterInput).not.toContain('Sample Visitor');
+  expect(savedAfterInput).not.toContain('visitor@example.com');
+  await page.reload();
+  await expect(page.getByText('No details entered yet.')).toBeVisible();
+});
+
+test('dimensions must be complete and positive if supplied', async ({ page }) => {
+  await page.goto('/quote');
+  await page.getByRole('button', { name: 'Select Standard Shipping Carton' }).click();
+  await page.getByRole('button', { name: /Next: Specify Requirements/i }).click();
+  const length = page.getByRole('textbox', { name: 'Standard Shipping Carton length in millimeters' });
+  const width = page.getByRole('textbox', { name: 'Standard Shipping Carton width in millimeters' });
+  const height = page.getByRole('textbox', { name: 'Standard Shipping Carton height in millimeters' });
+  await length.fill('120');
+  await page.getByRole('button', { name: /Next: Your Details/i }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Enter all three dimensions' })).toBeVisible();
+  await width.fill('80');
+  await height.fill('-5');
+  await page.getByRole('button', { name: /Next: Your Details/i }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'valid dimensions' })).toBeVisible();
+  await height.fill('50.5');
+  await page.getByRole('button', { name: /Next: Your Details/i }).click();
+  await expect(page.getByRole('heading', { name: '3. Your Details' })).toBeVisible();
+});
+
+test('desktop filters and search remain visible while scrolling through products', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/products');
+  const tools = page.getByTestId('desktop-catalogue-tools');
+  await expect(tools.getByRole('searchbox', { name: 'Search products' })).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 970));
+  await expect.poll(() => tools.evaluate((node) => node.getBoundingClientRect().top)).toBeGreaterThanOrEqual(89);
+  await expect.poll(() => tools.evaluate((node) => node.getBoundingClientRect().top)).toBeLessThan(105);
+  await tools.getByRole('button', { name: 'Product category' }).click();
+  await expect(page.getByRole('listbox', { name: 'Product category' })).toBeVisible();
+});
+
+test('mobile search and filters stay accessible while scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/products');
+  await page.evaluate(() => window.scrollTo(0, 1050));
+  const tools = page.getByTestId('mobile-catalogue-tools');
+  await expect.poll(() => tools.evaluate((node) => node.getBoundingClientRect().top)).toBeGreaterThanOrEqual(60);
+  await expect.poll(() => tools.evaluate((node) => node.getBoundingClientRect().top)).toBeLessThan(78);
+  await tools.getByRole('button', { name: 'Filters' }).click();
+  await tools.getByRole('button', { name: 'Product category' }).click();
+  await page.getByRole('option', { name: 'Mailers' }).click();
+  await tools.getByRole('button', { name: 'Show 3 products' }).click();
+  await expect(page.getByText('3 products', { exact: true })).toBeVisible();
+  expect(await page.locator('body').evaluate((body) => body.scrollWidth <= window.innerWidth + 2)).toBeTruthy();
+});
+
+test('breadcrumbs go home and 320px preview has no horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  await page.goto('/products');
+  await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Home' }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.goto('/quote');
+  await page.getByRole('button', { name: 'Select Standard Shipping Carton' }).click();
+  await page.getByRole('button', { name: /Next: Specify Requirements/i }).click();
+  await page.getByRole('button', { name: /Next: Your Details/i }).click();
+  await page.getByRole('textbox', { name: /Contact Name/i }).fill('Example Customer');
+  await page.getByRole('textbox', { name: /Company Name/i }).fill('Example Co');
+  await page.getByRole('textbox', { name: /Email Address/i }).fill('example@example.com');
+  await page.getByRole('button', { name: 'Preview Enquiry', exact: true }).click();
+  await expect(page).toHaveURL(/\/quote\/preview$/);
+  await expect(page.getByRole('button', { name: 'Copy Summary' })).toBeVisible();
+  expect(await page.locator('body').evaluate((body) => body.scrollWidth <= window.innerWidth + 2)).toBeTruthy();
 });
