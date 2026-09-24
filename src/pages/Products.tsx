@@ -145,8 +145,10 @@ export default function Products() {
         />
 
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          {/* Mobile: Search + Filter toggle */}
-          <div className="lg:hidden mb-6 flex gap-3">
+          {/* Keep search and category controls visible below the fixed mobile header. */}
+          <div data-testid="mobile-catalogue-tools"
+            className="sticky top-16 z-40 -mx-4 mb-6 border-b border-[#e8dfd2] bg-white/95 px-4 py-3 shadow-[0_5px_15px_rgba(30,23,13,.05)] backdrop-blur-lg sm:-mx-6 sm:px-6 lg:hidden">
+          <div className="flex gap-3">
             <div className="flex-1 relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a9490]" />
               <input
@@ -170,7 +172,10 @@ export default function Products() {
             </div>
             <button
               onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-[#e5e0d8] rounded-lg text-sm font-medium text-[#1a1a1a] bg-white cursor-pointer hover:border-[#c4883a] transition-colors"
+              type="button"
+              aria-expanded={mobileFiltersOpen}
+              aria-controls="mobile-filter-panel"
+              className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[#dbcab1] bg-white px-3.5 py-2 text-sm font-bold text-[#423328] shadow-sm transition-colors hover:border-[#b99059] focus-visible:outline-2 focus-visible:outline-[#c4883a]"
             >
               <SlidersHorizontal size={16} />
               Filters
@@ -187,7 +192,8 @@ export default function Products() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="lg:hidden overflow-hidden mb-6 border border-[#e5e0d8] rounded-lg"
+                id="mobile-filter-panel"
+                className="mt-3 max-h-[calc(100dvh-12rem)] overflow-y-auto rounded-xl border border-[#e5e0d8] bg-white shadow-lg"
               >
                 <div className="p-4 bg-white">
                   {renderFilterSidebar(true)}
@@ -195,10 +201,12 @@ export default function Products() {
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
 
           <div className="flex gap-8">
             {/* Desktop Sidebar */}
-            <div className="hidden lg:block w-52 shrink-0">
+            <div data-testid="desktop-catalogue-tools"
+              className="sticky top-[92px] hidden max-h-[calc(100dvh-110px)] w-52 shrink-0 self-start overflow-y-auto overscroll-contain pb-3 lg:block">
               {/* Desktop Search */}
               <div className="relative mb-6">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a9490]" />
