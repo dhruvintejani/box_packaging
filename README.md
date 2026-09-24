@@ -10,11 +10,12 @@ An interactive **frontend-only** packaging website concept created by **PixelAur
 - Editable integer quantity controls with manual entry and +/− buttons, including on mobile.
 - A live enquiry preview with Copy and Download (.txt) options.
 - A banner explaining that this is a PixelAura interactive concept.
-- Browser-local storage for demo progress and a Clear Enquiry action.
+- Sticky desktop filters/search and mobile search/filter controls.
+- Browser-local storage for product selections and technical preferences only, plus a Clear Enquiry action.
 
 There is intentionally no backend, payment flow, real enquiry submission, file upload or quotation-response promise.
 
-**Privacy:** Demo values remain in this browser's local storage until Clear Enquiry is used or browser storage is cleared. Use sample contact details, not actual customer data.
+**Privacy:** Contact details and free-text notes are kept **only in memory** while the demo tab is active; they are cleared when the page reloads or the enquiry is cleared. Selected products and non-sensitive technical preferences persist in local storage. Previously saved contact details are automatically removed. Use sample details, not real customer data.
 
 ## Run on your laptop
 
@@ -37,7 +38,9 @@ npx playwright test
 
 ## Deploy
 
-Use the Vite framework with `npm run build` and output directory `dist`. The included `vercel.json` enables direct links to product-detail and preview routes.
+Use the Vite framework with `npm run build` and output directory `dist`. The normal build serves the JPG images as independently cached assets for quicker initial page loads. The included `vercel.json` enables direct links to product-detail and preview routes.
+
+For a portable standalone HTML demonstration, run `npm run build:standalone` instead. That optional build embeds the images into the HTML; the normal Vercel build is preferred for a hosted demo.
 
 ## Adapting for a real business
 

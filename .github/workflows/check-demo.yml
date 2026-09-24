@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [fix/packaging-demo-polish]
+    branches: [fix/packaging-demo-polish, fix/demo-final-polish-sticky-filters]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +22,9 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npm run build
+      - name: Ensure hosted build doesn't inline large photos into HTML
+        run: node -e "if (require('node:fs').statSync('dist/index.html').size > 200000) process.exit(1)"
       - run: npm install --no-save @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
+      - run: npm run build:standalone

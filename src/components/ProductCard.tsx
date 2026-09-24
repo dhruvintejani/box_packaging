@@ -84,10 +84,10 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="mt-auto grid grid-cols-1 gap-2.5 min-[380px]:grid-cols-2 sm:grid-cols-1 xl:grid-cols-2">
           <button type="button"
             onClick={() => navigate(`/products/${product.slug}`)}
-            aria-label="View Product"
+            aria-label={`View ${product.name}`}
             className="group/view relative inline-flex min-h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-[#2b2926] bg-[#292522] px-2.5 py-3 text-xs font-bold tracking-[0.01em] text-white shadow-[0_5px_12px_rgba(30,24,18,0.12)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ad8247] hover:bg-[#40352b] hover:shadow-[0_8px_17px_rgba(30,24,18,0.2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bf8c45] active:translate-y-0 sm:text-sm xl:text-xs"
           >
-            <span>View Product</span>
+            <span>View</span>
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#c99a5d] text-[#292018] transition-transform duration-200 group-hover/view:translate-x-0.5 group-hover/view:-translate-y-0.5">
               <ArrowUpRight size={14} strokeWidth={2.5} aria-hidden="true" />
             </span>

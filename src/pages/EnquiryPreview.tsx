@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Edit2, Copy, Download, Trash2, Check, AlertCircle } from 'lucide-react';
+import { Edit2, Copy, Download, Trash2, Check, AlertCircle, PackageOpen, ArrowRight } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
@@ -42,8 +42,10 @@ export default function EnquiryPreview() {
   const [showClearModal, setShowClearModal] = useState(false);
 
   const { selectedProductIds, specifications, customerDetails } = enquiry;
+  const hasProducts = selectedProductIds.some((id) => Boolean(getProductById(id) && specifications[id]));
 
   const handleCopy = async () => {
+    if (!hasProducts) return;
     const text = formatEnquiryText(enquiry);
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
@@ -57,6 +59,7 @@ export default function EnquiryPreview() {
   };
 
   const handleDownload = () => {
+    if (!hasProducts) return;
     const text = formatEnquiryText(enquiry);
     downloadTextFile(text, 'packform-enquiry.txt');
   };
@@ -85,6 +88,39 @@ export default function EnquiryPreview() {
     const h = s.height && s.height.trim() ? `${s.height}` : '—';
     return `${l} × ${w} × ${h} mm`;
   };
+
+  // Direct preview links and a preview emptied by removing its last item should
+  // never display a misleading summary or allow blank copy/download actions.
+  if (!hasProducts) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1 pt-[70px]">
+          <DemoBanner />
+          <section className="mx-auto flex max-w-2xl flex-col items-center px-4 py-16 text-center sm:py-24"
+            aria-labelledby="empty-enquiry-heading">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-[#f4eadb] text-[#9c6a2d]">
+              <PackageOpen size={39} strokeWidth={1.6} aria-hidden="true" />
+            </div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-[#98672f]">Sample enquiry preview</p>
+            <h1 id="empty-enquiry-heading" className="mb-3 text-3xl font-extrabold tracking-tight text-[#25201c] sm:text-4xl">
+              Your sample enquiry is empty
+            </h1>
+            <p className="mb-7 max-w-md text-sm leading-7 text-[#625a52] sm:text-base">
+              Select at least one packaging product before previewing, copying or downloading a sample request.
+              Nothing will be sent to a manufacturer.
+            </p>
+            <button type="button" onClick={() => navigate('/quote')}
+              className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#2b2620] px-6 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#463527] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bd8b47] sm:w-auto">
+              Select Packaging Products
+              <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
+            </button>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -123,7 +159,7 @@ export default function EnquiryPreview() {
             <div>
               <p className="text-amber-800 font-semibold text-sm">Demo preview — this enquiry has not been sent.</p>
               <p className="text-amber-700 text-xs mt-0.5">
-                This is a demonstration. No data has been transmitted to any system.
+                This is a demonstration. No data has been transmitted to any system. Contact details and free-text notes are only kept until you reload or clear the demo.
               </p>
             </div>
           </motion.div>
@@ -143,7 +179,7 @@ export default function EnquiryPreview() {
                 </div>
                 <button
                   onClick={() => navigate('/quote', { state: { returnStep: 2 } })}
-                  className="flex items-center gap-1.5 text-[#c4883a] text-sm font-semibold hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap ml-4"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-lg text-sm font-semibold text-[#98672f] transition-colors hover:text-[#754719] focus-visible:outline-2"
                 >
                   <Edit2 size={14} />
                   Edit Enquiry
@@ -270,7 +306,7 @@ export default function EnquiryPreview() {
               )}
 
               {/* Guidance on editing notes */}
-              <div className="mt-4 border border-dashed border-[#e5e0d8] rounded-xl p-4 flex items-start gap-3 bg-[#f8f6f2]">
+              <div className="mt-4 flex flex-wrap items-start gap-3 rounded-xl border border-dashed border-[#e5e0d8] bg-[#f8f6f2] p-4">
                 <div className="w-8 h-8 rounded border border-[#e5e0d8] bg-white flex items-center justify-center shrink-0">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <rect x="2" y="2" width="12" height="12" rx="2" stroke="#9a9490" strokeWidth="1.2"/>
@@ -284,7 +320,7 @@ export default function EnquiryPreview() {
                   </p>
                 </div>
                 <button type="button" onClick={() => navigate('/quote', { state: { returnStep: 2 } })}
-                  className="ml-auto min-h-11 shrink-0 rounded-lg border border-[#c4883a] px-3 py-2 text-xs font-bold text-[#9b6624] hover:bg-[#fff3df]">
+                  className="ml-auto inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#c4883a] px-3 py-2 text-xs font-bold text-[#9b6624] hover:bg-[#fff3df]">
                   Edit notes
                 </button>
               </div>
