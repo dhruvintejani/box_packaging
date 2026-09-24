@@ -10,13 +10,13 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// The standalone Arena demo can be distributed as one HTML file. Normal
-// /public image URLs require separate asset deployment, which led to missing
-// images on some mobile views. Include the eight existing JPG files directly
-// in the Vite app, while retaining their public copies for normal hosting.
+// Vercel's normal build loads photos as independently cached assets rather
+// than downloading every JPG with the first HTML request. An optional separate
+// standalone build still embeds all photos for sharing a single HTML file.
 function embeddedPackagingImages(): Plugin {
   const virtualId = "virtual:packform-images";
   const resolvedId = "\0" + virtualId;
+  const inlineAssets = process.env.PACKFORM_STANDALONE === '1';
   const imageFiles = [
     "hero-boxes.jpg",
     "corrugated-stack.jpg",
@@ -35,6 +35,7 @@ function embeddedPackagingImages(): Plugin {
     },
     load(id) {
       if (id !== resolvedId) return undefined;
+      if (!inlineAssets) return 'export const embeddedImages = {};';
       const embedded = Object.fromEntries(
         imageFiles.map((name) => {
           const bytes = readFileSync(path.resolve(__dirname, "public", "images", name));
@@ -47,7 +48,7 @@ function embeddedPackagingImages(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [embeddedPackagingImages(), react(), tailwindcss(), viteSingleFile()],
+  plugins: [embeddedPackagingImages(), react(), tailwindcss(), ...(process.env.PACKFORM_STANDALONE === '1' ? [viteSingleFile()] : [])],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
