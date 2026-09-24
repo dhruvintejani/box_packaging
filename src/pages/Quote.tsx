@@ -180,7 +180,7 @@ export default function Quote() {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 pt-[70px]">
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none lg:pt-[70px]">
         <DemoBanner />
         {/* Hero */}
         <PageHero

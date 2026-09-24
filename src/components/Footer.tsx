@@ -9,8 +9,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5 mb-4 group">
-              <div className="w-9 h-9 rounded-sm bg-[#c4883a] flex items-center justify-center shrink-0">
+            <Link to="/" className="group mb-4 inline-flex items-center gap-2.5 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d9ab64]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#b7823f] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
                 <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
                   <rect x="2" y="8" width="18" height="12" rx="1" stroke="white" strokeWidth="1.5"/>
                   <path d="M6 8V5C6 3.895 6.895 3 8 3h6c1.105 0 2 .895 2 2v3" stroke="white" strokeWidth="1.5"/>
@@ -19,7 +19,7 @@ export default function Footer() {
                 </svg>
               </div>
               <div>
-                <div className="text-white font-extrabold text-base leading-tight tracking-tight">PACKFORM</div>
+                <div className="text-base font-extrabold leading-tight tracking-tight text-white transition-colors group-hover:text-[#e6b876]">PACKFORM</div>
                 <div className="text-[#9a9490] text-[9px] uppercase tracking-widest leading-tight font-medium">
                   Packaging for a Brighter Tomorrow
                 </div>
@@ -39,8 +39,9 @@ export default function Footer() {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="text-sm text-[#9a9490] hover:text-white transition-colors cursor-pointer"
+                    className="group/footer inline-flex min-h-9 items-center gap-1.5 rounded-lg py-1 text-sm text-[#c7c0b6] transition-colors duration-200 hover:text-[#f4cd95] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d9ab64]"
                   >
+                    <span aria-hidden="true" className="h-px w-0 bg-[#e6b876] transition-[width] duration-200 group-hover/footer:w-2" />
                     {label}
                   </Link>
                 </li>
@@ -66,10 +67,10 @@ export default function Footer() {
             <p className="text-sm text-[#9a9490] mb-4">Try a guided packaging quotation using sample information.</p>
             <button
               onClick={() => navigate('/quote')}
-              className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white text-sm font-semibold px-4 py-2.5 rounded transition-all duration-150 cursor-pointer"
+              className="group/footercta inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#a36b2c] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-[#c48b41] hover:shadow-[0_8px_20px_rgba(0,0,0,.15)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d9ab64] active:translate-y-0"
             >
               Try the Enquiry Demo
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true" className="transition-transform group-hover/footercta:translate-x-1">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>

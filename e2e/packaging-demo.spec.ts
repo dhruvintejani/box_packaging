@@ -310,3 +310,96 @@ test('breadcrumbs go home and 320px preview has no horizontal overflow', async (
   await expect(page.getByRole('button', { name: 'Copy Summary' })).toBeVisible();
   expect(await page.locator('body').evaluate((body) => body.scrollWidth <= window.innerWidth + 2)).toBeTruthy();
 });
+
+test('desktop navigation has premium hover/focus feedback and active state without shifting layout', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  const home = nav.getByRole('link', { name: 'Home' });
+  const products = nav.getByRole('link', { name: 'Products' });
+  await expect(home).toHaveAttribute('aria-current', 'page');
+  const initial = await products.boundingBox();
+  await products.hover();
+  const hovered = await products.evaluate((element) => {
+    const css = getComputedStyle(element);
+    const underline = element.querySelector('span[aria-hidden="true"]');
+    return {
+      background: css.backgroundColor,
+      color: css.color,
+      underline: underline ? getComputedStyle(underline).transform : '',
+    };
+  });
+  // Hover background is animated: poll until the transition starts rather
+  // than sampling during the very first transparent animation frame.
+  await expect.poll(async () => products.evaluate((node) =>
+    getComputedStyle(node).backgroundColor
+  )).not.toBe('rgba(0, 0, 0, 0)');
+  // Tailwind 4 uses the CSS scale property rather than a transform matrix.
+  // The rendered underline width validates the actual on-screen interaction.
+  await expect.poll(async () => products.locator('span[aria-hidden="true"]').evaluate(
+    (node) => node.getBoundingClientRect().width
+  )).toBeGreaterThan(16);
+  const after = await products.boundingBox();
+  expect(after?.width).toBe(initial?.width);
+  expect(after?.height).toBe(initial?.height);
+  await products.click();
+  await expect(products).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByText('15 products')).toBeVisible();
+});
+
+test('mobile navigation is accessible, highlights hovered items and closes with Escape', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const nav = page.getByRole('navigation', { name: 'Mobile navigation' });
+  await expect(nav).toBeVisible();
+  const products = nav.getByRole('link', { name: 'Products' });
+  await products.hover();
+  await expect(products).toHaveClass(/hover:bg/);
+  await page.keyboard.press('Escape');
+  await expect(nav).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeFocused();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await nav.getByRole('link', { name: 'Products' }).click();
+  await expect(page).toHaveURL(/\/products$/);
+  await expect(page.getByRole('button', { name: 'Open menu' })).toBeVisible();
+});
+
+test('skip navigation reaches main content and mobile layout respects header height', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 780 });
+  for (const path of ['/', '/products', '/quote', '/products/standard-shipping-carton']) {
+    await page.goto(path);
+    await page.keyboard.press('Tab');
+    const skip = page.getByRole('link', { name: 'Skip to content' });
+    await expect(skip).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeVisible();
+    await expect(page).toHaveURL(/#main-content$/);
+    const panelTop = await page.locator('main').evaluate((element) =>
+      getComputedStyle(element).paddingTop
+    );
+    expect(panelTop).toBe('64px');
+    const fits = await page.locator('body').evaluate((body) => body.scrollWidth <= innerWidth + 2);
+    expect(fits, 'Horizontal overflow at ' + path).toBeTruthy();
+  }
+});
+
+test('320px header fits with an active enquiry basket and usable menu', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.goto('/products/standard-shipping-carton');
+  await page.getByRole('button', { name: 'Continue to Enquiry' }).click();
+  await expect(page.getByRole('button', { name: 'Enquiry basket, 1 items' })).toBeVisible();
+  await expect(page.locator('header').getByText('PACKFORM')).toBeVisible();
+  const sizes = await page.locator('header').evaluate((node) => ({
+    header: node.getBoundingClientRect().width,
+    right: node.getBoundingClientRect().right,
+    viewport: innerWidth,
+  }));
+  expect(sizes.header).toBeLessThanOrEqual(sizes.viewport + 2);
+  expect(sizes.right).toBeLessThanOrEqual(sizes.viewport + 2);
+  await expect(page.locator('body').evaluate((body) =>
+    body.scrollWidth <= innerWidth + 2
+  )).resolves.toBeTruthy();
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
+});

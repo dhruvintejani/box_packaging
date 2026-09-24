@@ -21,7 +21,7 @@ export default function ProductDetails() {
     return (
       <div className="flex min-h-screen flex-col">
         <Header />
-        <main className="flex-1 pt-[70px]">
+        <main id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none lg:pt-[70px]">
           <DemoBanner />
           <div className="mx-auto max-w-3xl px-4 py-20 text-center">
             <PackageOpen size={48} className="mx-auto mb-5 text-[#c4883a]" />
@@ -51,7 +51,7 @@ export default function ProductDetails() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1 pt-[70px]">
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none lg:pt-[70px]">
         <DemoBanner />
         <div className="border-b border-[#ebdfcf] bg-gradient-to-r from-[#fdfaf5] via-[#fffdf9] to-[#f3e9db]">
           <nav aria-label="Breadcrumb" className="mx-auto flex min-h-14 max-w-[1280px] flex-wrap items-center gap-2 px-4 py-3 text-xs font-semibold text-[#776b5f] sm:px-6 lg:px-8">
