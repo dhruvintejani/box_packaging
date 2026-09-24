@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 async function openFirstProduct(page: Page) {
   await page.goto('/products');
   await expect(page.getByText('15 products')).toBeVisible();
-  await page.getByRole('button', { name: 'View Details' }).first().click();
+  await page.getByRole('button', { name: 'View Product' }).first().click();
   await expect(page).toHaveURL(/\/products\/[^/]+$/);
   await expect(page.getByRole('heading', { name: 'Standard Shipping Carton' })).toBeVisible();
 }
@@ -106,7 +106,7 @@ test('all catalogue photos are local packaging images and filtering uses premium
   const cards = page.locator('img[loading="lazy"]');
   await expect(cards).toHaveCount(15);
   const localImages = await cards.evaluateAll((images) =>
-    images.every((image) => (image as HTMLImageElement).getAttribute('src')?.startsWith('/images/'))
+    images.every((image) => (image as HTMLImageElement).getAttribute('src')?.startsWith('data:image/jpeg;base64,'))
   );
   expect(localImages).toBeTruthy();
 
@@ -159,4 +159,42 @@ test('premium category picker escapes the mobile filters panel without clipping'
   await expect(page.getByText('2 products', { exact: true })).toBeVisible();
   const fits = await page.locator('body').evaluate((body) => body.scrollWidth <= window.innerWidth + 2);
   expect(fits).toBeTruthy();
+});
+
+test('all 15 product-detail photographs render on mobile rather than a blank image panel', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto('/products');
+  const slugs = await page.locator('[data-product-slug]').evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-product-slug')).filter((slug): slug is string => !!slug)
+  );
+  expect(slugs).toHaveLength(15);
+
+  for (const slug of slugs) {
+    await page.goto('/products/' + slug);
+    const gallery = page.getByTestId('product-image-gallery');
+    await expect(gallery).toBeVisible();
+    const img = page.getByTestId('product-photo');
+    await expect(img).toBeVisible();
+    await expect.poll(async () => img.evaluate((node) => {
+      const image = node as HTMLImageElement;
+      return image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;
+    }), { message: 'Image must render on mobile for ' + slug }).toBeTruthy();
+
+    const visual = await img.evaluate((node) => {
+      const image = node as HTMLImageElement;
+      const imgRect = image.getBoundingClientRect();
+      const panelRect = image.closest('figure')!.getBoundingClientRect();
+      return {
+        objectFit: window.getComputedStyle(image).objectFit,
+        imgWidth: imgRect.width,
+        panelWidth: panelRect.width,
+      };
+    });
+    expect(visual.objectFit).toBe('contain');
+    expect(visual.imgWidth).toBeGreaterThan(150);
+    expect(visual.panelWidth).toBeGreaterThan(250);
+    expect(await page.locator('body').evaluate((body) =>
+      body.scrollWidth <= window.innerWidth + 2
+    )).toBeTruthy();
+  }
 });
