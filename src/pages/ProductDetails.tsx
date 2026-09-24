@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, ClipboardList, PackageOpen } from 'lucide-react';
+import ProductPhoto from '../components/ProductPhoto';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DemoBanner from '../components/DemoBanner';
@@ -14,10 +15,8 @@ export default function ProductDetails() {
   const navigate = useNavigate();
   const product = products.find((entry) => entry.slug === slug || entry.id === slug);
   const { enquiry, addProduct, isSelected, updateSpecifications } = useEnquiry();
-  const [imgError, setImgError] = useState(false);
   // Changing the number should never silently add a product to the enquiry.
   const [draftQuantities, setDraftQuantities] = useState<Record<string, number>>({});
-  useEffect(() => setImgError(false), [slug]);
 
   if (!product) {
     return (
@@ -64,16 +63,7 @@ export default function ProductDetails() {
             <ArrowLeft size={17} /> All products
           </Link>
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-[#e5e0d8] bg-[#f8f6f2] shadow-sm">
-              {imgError ? (
-                <div className="flex h-full flex-col items-center justify-center gap-3 text-[#756c62]">
-                  <PackageOpen size={54} aria-hidden="true" /><span>Packaging concept illustration</span>
-                </div>
-              ) : (
-                <img src={product.image} alt={product.name} onError={() => setImgError(true)}
-                  className="h-full w-full object-cover" />
-              )}
-            </div>
+            <ProductPhoto key={product.id} src={product.image} alt={product.name} />
             <div className="min-w-0">
               <span className="mb-3 inline-block rounded-full bg-[#f5e8d0] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#986425]">{product.category}</span>
               <h2 className="mb-4 text-3xl font-extrabold leading-tight text-[#1a1a1a] sm:text-4xl">{product.name}</h2>
@@ -98,8 +88,8 @@ export default function ProductDetails() {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button type="button" onClick={addAndQuote}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#c4883a] px-5 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#ae742c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c4883a] sm:w-auto">
-                  <ClipboardList size={18} /> Continue to Enquiry <ArrowRight size={16} />
+                  className="group inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-xl border border-[#2c261f] bg-[#27231e] px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_22px_rgba(35,27,19,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#b1844a] hover:bg-[#40352a] hover:shadow-[0_12px_27px_rgba(35,27,19,0.22)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c4883a] active:translate-y-0 sm:w-auto">
+                  <ClipboardList size={18} className="text-[#edc58f]" aria-hidden="true" /> Continue to Enquiry <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </button>
                 <Link to="/products"
                   className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#d8cfbf] bg-white px-5 py-3 text-sm font-semibold text-[#1a1a1a] transition-colors hover:bg-[#f8f6f2] focus-visible:outline-2 sm:w-auto">
