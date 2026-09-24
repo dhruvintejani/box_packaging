@@ -7,7 +7,7 @@ import { useEnquiry } from '../context/EnquiryContext';
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/products', label: 'Products' },
-  { to: '/quote', label: 'Request a Quote' },
+  { to: '/quote', label: 'Build an Enquiry' },
 ];
 
 export default function Header() {
@@ -83,7 +83,7 @@ export default function Header() {
           {/* Desktop Right */}
           <div className="hidden lg:flex items-center gap-3">
             <button
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/products?focus=search')}
               className="text-[#5a5550] hover:text-[#1a1a1a] transition-colors cursor-pointer p-2"
               aria-label="Search products"
             >
@@ -96,7 +96,7 @@ export default function Header() {
               onClick={() => navigate('/quote')}
               className="flex items-center gap-2 bg-[#c4883a] hover:bg-[#b07a30] active:bg-[#9e6d28] text-white text-sm font-semibold px-4 py-2.5 rounded transition-all duration-150 cursor-pointer shadow-sm hover:shadow"
             >
-              Start an Enquiry
+              Try the Enquiry Demo
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
