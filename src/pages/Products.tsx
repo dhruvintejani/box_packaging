@@ -23,10 +23,13 @@ export default function Products() {
 
   const [searchParams] = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    if (searchParams.get('focus') === 'search') searchInputRef.current?.focus();
+    if (searchParams.get('focus') === 'search') {
+      (window.innerWidth >= 1024 ? searchInputRef : mobileSearchInputRef).current?.focus();
+    }
   }, [searchParams]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
@@ -82,7 +85,7 @@ export default function Products() {
 
   const hasActiveFilters = search !== '' || selectedCategory !== 'All' || sortBy !== 'featured';
 
-  const FilterSidebar = () => (
+  const renderFilterSidebar = () => (
     <aside aria-label="Product filters">
       <h2 className="text-[#1a1a1a] font-bold text-base mb-4">Filter Products</h2>
 
@@ -153,7 +156,7 @@ export default function Products() {
             <div className="flex-1 relative">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a9490]" />
               <input
-                ref={searchInputRef}
+                ref={mobileSearchInputRef}
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -193,7 +196,7 @@ export default function Products() {
                 className="lg:hidden overflow-hidden mb-6 border border-[#e5e0d8] rounded-lg"
               >
                 <div className="p-4 bg-white">
-                  <FilterSidebar />
+                  {renderFilterSidebar()}
                 </div>
               </motion.div>
             )}
@@ -206,6 +209,7 @@ export default function Products() {
               <div className="relative mb-6">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9a9490]" />
                 <input
+                  ref={searchInputRef}
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -223,7 +227,7 @@ export default function Products() {
                   </button>
                 )}
               </div>
-              <FilterSidebar />
+              {renderFilterSidebar()}
             </div>
 
             {/* Main content */}
