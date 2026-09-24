@@ -85,7 +85,7 @@ export default function Products() {
 
   const hasActiveFilters = search !== '' || selectedCategory !== 'All' || sortBy !== 'featured';
 
-  const renderFilterSidebar = () => (
+  const renderFilterSidebar = (mobile: boolean) => (
     <aside aria-label="Product filters">
       <h2 className="text-[#1a1a1a] font-bold text-base mb-4">Filter Products</h2>
 
@@ -99,7 +99,8 @@ export default function Products() {
             return (
               <label key={cat} className="flex items-center gap-2.5 cursor-pointer group">
                 <input
-                  type="checkbox"
+                  type="radio"
+                  name={mobile ? 'mobile-category' : 'desktop-category'}
                   checked={isChecked}
                   onChange={() => setSelectedCategory(isAll ? 'All' : (cat as ProductCategory))}
                   className="w-4 h-4 rounded border-[#c0bab2] accent-[#c4883a] cursor-pointer"
@@ -120,7 +121,7 @@ export default function Products() {
           onClick={() => setMobileFiltersOpen(false)}
           className="lg:hidden w-full bg-[#c4883a] hover:bg-[#b07a30] text-white text-sm font-semibold py-2.5 rounded transition-all cursor-pointer"
         >
-          Apply Filters
+          Close Filters
         </button>
         {hasActiveFilters && (
           <button
@@ -196,7 +197,7 @@ export default function Products() {
                 className="lg:hidden overflow-hidden mb-6 border border-[#e5e0d8] rounded-lg"
               >
                 <div className="p-4 bg-white">
-                  {renderFilterSidebar()}
+                  {renderFilterSidebar(true)}
                 </div>
               </motion.div>
             )}
@@ -227,7 +228,7 @@ export default function Products() {
                   </button>
                 )}
               </div>
-              {renderFilterSidebar()}
+              {renderFilterSidebar(false)}
             </div>
 
             {/* Main content */}
