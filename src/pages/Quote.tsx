@@ -745,7 +745,7 @@ export default function Quote() {
                       <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                         <path d="M7 1C3.686 1 1 3.686 1 7s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zM7 10.5v-3M7 6V4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                       </svg>
-                      Add more products
+                      Browse catalogue
                     </button>
                   </div>
                 </div>
