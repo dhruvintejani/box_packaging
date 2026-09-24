@@ -165,10 +165,10 @@ export default function Home() {
                 </p>
                 <button
                   onClick={() => navigate('/products')}
-                  className="flex items-center gap-1.5 text-[#c4883a] font-semibold text-sm hover:text-[#b07a30] transition-colors cursor-pointer whitespace-nowrap"
+                  className="group/all inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-bold text-[#916024] transition-colors duration-200 hover:bg-[#fbf0df] hover:text-[#744a1b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b17a36]"
                 >
                   View All Products
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} className="transition-transform duration-200 group-hover/all:translate-x-1" aria-hidden="true" />
                 </button>
               </div>
             </div>
