@@ -131,7 +131,7 @@ export default function Quote() {
       if (dimensions.every((value) => value === '')) continue;
       if (dimensions.some((value) => value === '')) {
         nextErrors[productId] = 'Enter all three dimensions, or leave them all blank and describe your requirements below.';
-      } else if (dimensions.some((value) => !/^\\d{1,5}(\\.\\d{1,2})?$/.test(value) || Number(value) <= 0 || Number(value) > 10000)) {
+      } else if (dimensions.some((value) => !/^\d{1,5}(\.\d{1,2})?$/.test(value) || Number(value) <= 0 || Number(value) > 10000)) {
         nextErrors[productId] = 'Enter valid dimensions greater than 0 and no more than 10,000 mm (up to 2 decimal places).';
       }
     }
