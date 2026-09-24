@@ -156,7 +156,7 @@ test('premium category picker escapes the mobile filters panel without clipping'
   await expect(page.getByRole('option', { name: 'Heavy Duty' })).toBeVisible();
   await page.getByRole('option', { name: 'Heavy Duty' }).click();
   await page.getByRole('button', { name: /Show 2 products/ }).click();
-  await expect(page.getByText('2 products')).toBeVisible();
+  await expect(page.getByText('2 products', { exact: true })).toBeVisible();
   const fits = await page.locator('body').evaluate((body) => body.scrollWidth <= window.innerWidth + 2);
   expect(fits).toBeTruthy();
 });
