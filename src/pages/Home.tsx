@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Leaf, Shield, Settings, Truck, ChevronRight } from 'lucide-react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import DemoBanner from '../components/DemoBanner';
 import { products } from '../data/products';
 
 
@@ -46,6 +47,7 @@ export default function Home() {
       <Header />
 
       <main className="flex-1 pt-[70px]">
+        <DemoBanner />
         {/* HERO */}
         <section
           className="relative min-h-[480px] sm:min-h-[540px] lg:min-h-[580px] bg-[#1a1a1a] overflow-hidden flex items-center"
@@ -190,10 +192,10 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: index * 0.06 }}
                   className="bg-white flex flex-col group cursor-pointer"
-                  onClick={() => navigate('/products')}
+                  onClick={() => navigate(`/products/${product.slug}`)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/products')}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(`/products/${product.slug}`)}
                   aria-label={`View ${product.name}`}
                 >
                   <div className="aspect-square bg-[#f8f6f2] overflow-hidden">
