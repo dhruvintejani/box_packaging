@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import Header from '../components/Header';
+import DemoBanner from '../components/DemoBanner';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 import ProductCard from '../components/ProductCard';
@@ -128,6 +129,7 @@ export default function Products() {
       <Header />
 
       <main className="flex-1 pt-[70px]">
+        <DemoBanner />
         {/* Hero */}
         <PageHero
           breadcrumbs={[{ label: 'Home' }, { label: 'Products' }]}
